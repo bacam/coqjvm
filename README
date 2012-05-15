@@ -6,7 +6,8 @@ This repository contains:
   - an OCaml library for dealing with JVM classfiles; and
   - a slightly modified copy of extlib 1.5 (see below).
 
-
+At the time of writing, I was able to successfully build it with OCaml 3.11.2
+and Coq 8.2pl1.
 
 The copy of extlib-1.5 has been modified.  In particular (from the original svn
 logs):
