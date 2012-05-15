@@ -81,7 +81,7 @@ recclean: clean
 	coqc -I .. $(COQ_DIR_OPT) $*
 
 deps-coq: *.v
-	coqdep -I .. $(COQ_DIR_OPT) $^ | sed -e 's/^Extraction.vo:/coqextract.cmo coqextract.cmi:/' > $@
+	coqdep -I .. $(COQ_DIR_OPT) $^ | sed -e 's/^Extraction.vo/coqextract.cmo coqextract.cmi/' > $@
 
 deps-ml: $(ML_SOURCE)
 	ocamldep $^ > $@
