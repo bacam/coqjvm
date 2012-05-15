@@ -1,0 +1,6 @@
+#!/bin/bash
+set -ex
+../../../minijava/minijava io/Descriptor.java
+../../../minijava/minijava io/File.java
+../../../minijava/minijava ReadLots.java
+../resverifier --resources io.Descriptor --priv=io.File io/Descriptor io/File ReadLots

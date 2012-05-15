@@ -1,0 +1,6 @@
+#!/bin/bash
+set -ex
+../../../ocaml-jvml-bob/jas Iface.j
+../../../ocaml-jvml-bob/jas Impl.j
+../../../ocaml-jvml-bob/jas Test.j
+../resverifier

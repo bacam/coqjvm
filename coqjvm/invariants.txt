@@ -1,0 +1,7 @@
+all loaded classes have well-formed super_lists
+all loaded classes have a match between their names and their pointers
+all initialised classes have their static fields present
+all static fields are type correct
+if an instance exists then its class is initialised
+all instance fields are type correct
+all instances have the correct fields

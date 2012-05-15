@@ -1,0 +1,58 @@
+Bob:
+
+- should put/get(field/static) allow arrays as the class name?
+- write an assembler and disassembler
+- genericise decompile:
+  - to Classdecl
+  - to the Coq representation
+  - to the ClassInfo (signature for compilation)
+- reinstate Localvar
+- write more tests (especially for malformed .class files)
+- add custom annotation support in Bytecode, and write a typechecker that produces StackMapTables
+- write a special module for understanding "modified utf-8"
+- split out Zipfile.ml and Util.ml to a 'Utils' package
+- break up the ClassfileInputError, ClassfileOutputError and so on exceptions into more meaningful symbolic parts
+- write something that splits up method bodies into basic blocks:
+  - each basic block has one entry point and multiple exit points
+  - find every jump-to point and maximally extend to the next one
+  - graphical representation? for debugging?
+  - overlays on the code array? or look at Norman Ramsey's functional representation of code
+- Decode signatures properly
+
+-------------------------------------------------
+
+
+Remember that mod is different from SML.
+Fix Int32j.toString for minInt or whatever it is
+
+Rationalise the file-to-classdecl-type functions in
+Decompile.ml and Classfile.ml
+
+Move filename <-> classname conversions to Utils?
+
+* Write something to replace labels with exact bytecode 
+  positions (better for Bob)
+
+* Add some interface files 
+
+* Write some documentation
+
+* Do descriptor scanning functions in Bytecode.ml more sensibly.
+  Note that extlib contains extra string functions that might be
+  helpful.
+
+* Think about arranging the constant pool more efficiently (most
+  popular entries at the front, so that shorter instructions can
+  be used to access them).  This would probably require an extra
+  pass during Classdecl -> Classfile translation (but it might let
+  us get rid of EstimateJumps)
+
+* Look again at the various Int* and Word* files and see if we
+  can use ocaml's integer types instead.
+
+* Remember that Stackdepth.maxdepth isn't calulated  anywhere 
+  in ocaml-jvml: you have to do it yourself and store it in the 
+  attributes (only important for code that's been generated or
+  modified).
+
+

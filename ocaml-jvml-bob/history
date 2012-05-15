@@ -1,0 +1,190 @@
+The files in this directory are from ocaml-jvml-bob as the history reaches
+point 7.  I've elided some details about a similarly named library with a
+similar purpose that was produced for a project with some different licensing
+requirements.
+
+  Brian Campbell, 15th May 2012.
+
+=============================================================================
+
+History of versions of the ocaml-jvml library.
+Kenneth MacKenzie, October 2010.
+
+I've made an attempt to summarise the evolution of the ocaml-jvml
+library in order to clarify the intellectual property issues.
+
+----------------------------------------------------------------
+
+1.  The ultimate origin of much of the code referred to below is
+Peter Bertelsen's SML-JVM toolkit (see www.dina.dk/~pmb/publications.html)
+
+This is a collection of SML modules for reading (but not writing) JVM
+classfiles and converting them into SML data structures.  The toolkit
+was developed as the back end of an SML to JVM compiler implemented
+by Peter Bertelsen for his master's thesis under the supervision of
+Peter Sestoft at the Technical University of Denmark.
+
+There are two main datatypes: Classfile.class_file and
+Classdecl.class_decl.  The class_file structure contains a more or
+less byte-for-byte image of a classfile including the constant
+pool. The class_decl structure contains a much more abstract
+representation, where the items in the constant pool are extracted and
+explicitly included in the JVM attributes and bytecode instructions.
+For example, in a classfile an invokevirtual instruction will contain
+an index pointing to a method descriptor in the constant pool, and the
+descriptor will contain a rather compressed description of the method
+to be invoked, such as (IDLjava/lang/Thread;)Ljava/lang/Object.  In
+the class_decl object this will be unpacked so that the invokevirtual
+instruction contains a field referrring to the method java.lang.Object
+mymethod(int i, double d, java.lang.Thread t).  
+
+Bytecode instructions with similar functions are conflated, so that
+for example iload n, iload_0, iload_1, iload_2 and iload_3 are all
+represented by a single iload n instruction.  The bytecode in a method
+is represented as a list of Bytecode.jvm_instr items, and jump targets
+are represented by a 'label' pseudo-instruction; thus an instruction
+which says "jump backwards 22 bytes" will be replaced by an
+instruction saying something like "jump to label 3".
+
+The SML-JVM toolkit doesn't come with any license, but I have an email
+from Peter Bertelsen (appended below) giving us permission to
+distribute our extended versions, and to apply a GPL-type license.
+
+
+2. Under the supervision of Stephen Gilmore, Laura Korte subsequently
+extended Bertelesen's code to allow decompilation of classfiles as
+well.  This was part of a project to implement a JVM in SML: see
+http://homepages.inf.ed.ac.uk/stg/research/projects/MLJVM/ .
+
+The decompiled code is represented in a new SML datatype which is
+intended for execution, and is much closer to Bertelsen's class_file
+type than to the clas_decl type: the bytecode instructions are
+decompiled to a datatype with similar instructions left unconflated
+and with jumps to explicit offsets in an array of instructions.  The
+constant pool and all other metadata are left in binary form.
+
+Note that the source for MLJVM can be downloaded from the URL above,
+and comes with a GPL.  The source also includes the modified SML-JVM
+toolkit,  so presumably this is also covered by the GPL.
+
+
+3.  In the MRG project, we required full decompilation. This was done
+by Kenneth MacKenzie and Matthew Prowse, using some of Korte's
+low-level code.  The resulting extended form of the SML-JVM toolkit
+was capable of fully decompiling a JVM classfile back into the
+class_decl form.  The code was later extended to handle features which
+were added to the JDK 1.5 VM to support Java 2, as documented in the
+Maintenance Information at
+
+http://java.sun.com/docs/books/jvms/jvms-maintenance.html
+
+The most notable additions were to the 'attribute' structure in the
+constant pool, in order to support Java annotations.  There were also 
+additions for JVM support of generics, and a modification of the ldc 
+instruction to allow direct loading of Class objects onto the stack.
+
+This version of the SML-JVM toolkit is included in a zipfile which can
+be downloaded from http://groups.inf.ed.ac.uk/mrg/camelot/ . This file
+includes no license, although the Camelot and Grail subdirectories
+contain notices attributing copyright to Kenneth MacKenzie and Nicholas
+Wolverson of the University of Edinbrugh.   The SML-JVM subdirectory
+contains some code derived from Laura Korte's version above, so should 
+presumably also include a GPL.
+
+
+4. During the Request project, the MRG code was ported to OCaml by
+Kenneth MacKenzie.  This is in the ocaml-jvml directory in the Request
+repository.
+
+5. Robert Atkey then rewrote this, tidying stuff up and improving the
+representation in various ways; this is in the ocaml-jvml-bob
+directory in the Request repository.
+
+6. Robert Atkey reimplemented ocaml-jvml from scratch, to obtain a
+version whose IP could unambiguously be attributed to the University
+of Edinburgh.  This version was subsequently used in [a different
+project.  It is not the version here.]
+
+7. The code in ocaml-jvml and ocaml-jvml-bob has continued to evolve
+independently of the code described in 6, which may itself have evolved
+[elsewhere.]
+
+8. Note that another OCaml library (Javalib) for representing JVM
+class files has been developed at INRIA Rennes: see
+javalib.gforge.inria.fr .  This is not dissimilar to ocaml-jvml.
+
+
+
+
+Appendix: email correspondence with Peter Bertelsen.
+----------------------------------------------------
+
+From: Peter Bertelsen <petermb@tiscali.dk>
+To: Kenneth MacKenzie <kwxm@inf.ed.ac.uk>
+Subject: Re: SML-JVM extensions
+Date: Tue, 15 Jun 2004 09:38:10 +0200
+
+Hello Kenneth,
+
+Thank you for your mail - and sorry about the delayed reply.
+It's nice to hear that my toolkit has been of use to you.
+
+I also implemented reading of class files, presumably in a later version 
+of the toolkit than the one you've been starting from. The purpose of this 
+was to provide an abstract interface for manipulation of class files, but 
+I don't recall the exact state of the code. It's been a while since I last 
+had a look at it...
+
+It would be interesting to see how you have extended my toolkit. I would 
+very much like to have a copy.  :-)
+
+As far as licenses go, I don't have much experience, which is also why I 
+didn't attach one myself in the first place. I certainly don't mind if you 
+distribute your extended SML-JVM toolkit, including my code. If you prefer 
+to attach a GPL style license of some sort, that's fine with me.
+
+Best regards,
+Peter Bertelsen
+
+
+On Tue, 8 Jun 2004 15:21:42 +0100, Kenneth MacKenzie <kwxm@inf.ed.ac.uk> 
+wrote:
+>
+> Hello there,
+>
+>       I'm a researcher on a project called "Mobile Resource
+> Guarantees" at Edinburgh University (see
+> http://groups.inf.ed.ac.uk/mrg/).  We're developing a proof
+> carrying code system which will allow us to provide guarantees about
+> heap usage of JVM bytecode programs compiled from an ML-type
+> language.  Our compiler uses SML-JVM in the back end, which saved us a
+> lot of work: thanks!
+>
+> We also need to be able to examine classfiles,  so we've extended the
+> SML-JVM toolkit so that it's now possible to read in a classfile and
+> convert it to your Classdecl format.  Would you like a copy of the
+> extended version of SML-JVM,  and do you have any objections if we
+> distribute it (including your original code),  possibly with a Gnu
+> Public License attached?
+>
+> With Best Wishes,
+>
+>      Kenneth MacKenzie
+
+
+----------------------------------------------------------------
+
+From: Peter Bertelsen <petermb@tiscali.dk>
+To: Kenneth MacKenzie <kwxm@inf.ed.ac.uk>
+Subject: Re: SML-JVM extensions
+Date: Fri, 09 Jul 2004 09:31:55 +0200
+
+Hello Kenneth,
+
+Thank you for the copy of the extended toolkit. It looks like the README 
+is a good starting point for seeing what has changed. I'll have a look and 
+try to compare it with the extensions and changes I made.
+
+Best regards,
+Peter Bertelsen
+

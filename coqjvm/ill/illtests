@@ -1,0 +1,184 @@
+!A
+A * A
+let !x be x in x * x end
+OK
+
+A
+A*A
+x*x
+FAIL
+
+A
+A&A
+x&x
+OK
+
+A
+A&A
+x*x
+FAIL
+
+A*A-oB
+B
+let a*f be x in f a end
+OK
+
+A&B
+A
+#1x
+OK
+
+A&B
+B
+#2x
+OK
+
+A*B
+A
+#1x
+FAIL
+
+A*B
+B
+#2x
+FAIL
+
+!A
+A
+let !x be x in x end
+OK
+
+A
+!A
+!x
+FAIL
+
+!A
+!A
+let !x be x in !x end
+OK
+
+(A-oA-oB) * !A
+B
+let f*a be x in let !a be a in f a a end end
+OK
+
+A
+A
+let y be x in y end
+OK
+
+!A
+A*A
+let !y be x in let z be y in y*z end end
+OK
+
+!A
+(A*A)&(A*A)
+let !y be x in let aa be y*y in aa&aa end end
+OK
+
+% TT
+% TT
+% $ax1 x
+% FAIL
+
+% A
+% A*A
+% $ax1 x
+% OK
+
+% A
+% A*B
+% x * $ax2 tt
+% OK
+
+% !A
+% A*B
+% let !x be x in x * $ax2 tt end
+% OK
+
+% !A
+% A * B
+% x * $ax2 tt
+% FAIL
+
+% !A
+% !(A * A)
+% let !x be x in !($ax1 x) end
+% OK
+
+A * B
+B * A
+let x*y be x in y*x end
+OK
+
+A * B
+A & B
+let x*y be x in x & y end
+OK
+
+A
+TT
+tt
+OK
+
+!A
+A * !A
+let !x be x in x * !x end
+OK
+
+A
+!A
+!x
+FAIL
+
+A * (B * C)
+(A * B) * C
+let a*bc be x in let b*c be bc in (a*b)*c end end
+OK
+
+A * TT
+A
+let a*d be x in a end
+OK
+
+% B
+% A * A
+% $ax1(x)
+% FAIL
+
+A * B * C
+B * C * A
+let ab*c be x in let a*b be ab in (b*c)*a end end
+OK
+
+!(A&B)
+!A&!B
+let !x be x in !#1x & !#2x end
+OK
+
+!A*!B
+!(A*B)
+let a*b be x in let !a be a in let !b be b in !(a*b) end end end
+OK
+
+java.lang.NullPointerException
+(TT * ((TT -o TT)&(TT -o TT))) & (java.lang.NullPointerException * TT)
+(tt * ((@ x : TT . x) & (@ x : TT . x))) & (x * tt)
+OK
+
+java.lang.NullPointerException*A
+A*(((java.lang.NullPointerException)*(((TT)-o(TT))&((TT)-o(TT))))&((java.lang.NullPointerException)*(TT)))
+let e*a be x in a * ((e * ((@x : TT . x) & (@x : TT . x))) & (e * tt)) end
+OK
+
+java.lang.NullPointerException
+((java.lang.NullPointerException)*(((TT)-o(TT))&((TT)-o(TT))))&((java.lang.NullPointerException)*(TT))
+(x * ((@x : TT . x) & (@x : TT . x))) & (x * tt)
+OK
+
+java.lang.NullPointerException * !A
+(TT)&((A)*(((java.lang.NullPointerException)*(((java.lang.NullPointerException)-o((java.lang.NullPointerException)*(!(A))))&((TT)-o(TT))))&((java.lang.NullPointerException)*(TT))))
+let e*a be x in tt & (let !a be a in (a * ((e * ((@e : java.lang.NullPointerException . e * !a) & (@x : TT . x))) & (e * tt))) end) end
+OK

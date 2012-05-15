@@ -1,0 +1,38 @@
+Bug with extraction and Program tactic:
+1. requires subtac.FixSub
+2. module subtac.Utils redefines extraction for pairs
+
+Ideas:
+- remove stack_type_category in ClassDatatypesIface.v
+
+- get rid of duplicate definitions of default_value in Execution.v and ClassDataTypes.v
+
+- add a predicate in Resolution.v that gives you all the fields for a given class, and a test to see whether a given field is in a class
+  - an instance of a class 'A' is allowed to have a field 'x C.f' iff that field exists, is an instance field and 'A' is a subclass of C
+
+
+
+To add arrays:
+
+- most places we can have a class, we can have an 'array class'.
+- class names become "reference types"
+- assignability now works between reference types
+- arrays are represented on the heap as a special kind of object
+- there are a limited number of methods for arrays that need to be special cased by the invoke* instructions (look at the spec)
+- need to implement the array creation instructions and array access instructions
+- need to extend all the OO instructions with special cases for arrays
+
+- first thing to do: get arrays in the heap
+  - new kind of heap thing: arrays, which contain the data and the element type
+  - new predicates for describing the heap's contents
+    - array_exists
+    - array_type
+    - array_element
+- stick to arrays with only ints and refs for now
+- split types into base types and reference types
+
+
+Needed in CertRuntimeTypes.v:
+ - a connection between fields in objects and fields in classes
+ - a way to read out a member of an array (or fail with out-of-range) (need a mapping from machine integers to nats)
+ - 

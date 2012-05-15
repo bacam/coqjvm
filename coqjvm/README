@@ -1,0 +1,41 @@
+CoqJVM
+------
+
+Authors: bob.atkey@ed.ac.uk, Brian.Campbell@ed.ac.uk
+
+This is the start of an executable specification of the JVM in Coq,
+with a start at a simple verifier. The idea is that the specification
+be extractable to O'Caml so it can be tested against actual JVM
+implementations. In an attempt to make the execution run at a
+reasonable speed, details of the underlying machine such as integers
+and machine addresses are abstracted via functors. 
+
+To compile you will need Coq 8.2, a reasonably recent version of
+ocaml (3.10.1 works) and ocamldsort.
+
+With Coq 8.2 on your path just type 'make'. This will, eventually,
+produce an executable called 'coqjvm'. Type './coqjvm' to get usage
+information. By default it tries to load classes from the current
+directory. Some examples are included. Try:
+  javac Test.java
+  ./coqjvm Test factorial 10
+
+The command line syntax is:
+  ./coqjvm <reference-to-class-files> <class-name> <method-name> <args>
+where:
+  reference-to-class-files : either the filename of a class, or the name of a directory from which to load classes
+  class-name               : the class name of the method to be invoked
+  method-name              : method name to invoke, must be a static method that returns an int, and takes the right number of ints:
+  args                     : list of integers to be passed as arguments
+
+
+You can also type 'cd ill; make' to compile a certified proof checker
+for Intuitionistic Linear Logic. This will produce an executable
+called 'ill_proofcheck'. Run it as:
+  ./ill_proofcheck < illtests
+to see it check some proofs.
+
+A verifier for simple resource properties specified using ILL formula
+is in the 'verifier' directory.  Type 'make' to build the verifier
+executable, 'resverifier'.  Type 'make ResourceSafety.vo' to check the
+safety proof.

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+echo Rebuilding coq extraction.
+set -ex
+test '!' -d coqextraction || rm -r coqextraction
+mkdir coqextraction
+cd coqextraction
+coqtop -batch -I ../.. -R ../../ill ILL -R .. Verifier -lv Extraction.v
+echo "MLfiles=" `ocamldsort *.ml` > make
+cat <<EOF >> make
+CMOfiles=\$(MLfiles:.ml=.cmo)
+
+OCAMLC_OPTS=-I .. -g
+
+coqextract.cmo coqextract.cmi: \$(CMOfiles)
+	ocamlc.opt \$(OCAMLC_OPTS) -pack -o coqextract.cmo \$(CMOfiles)
+
+.SUFFIXES: .v .vo .ml .cmo .mli .cmi .mly .mll
+
+.ml.cmo:
+	ocamlc.opt \$(OCAMLC_OPTS) -c \$<
+
+.mli.cmi:
+	ocamlc.opt \$(OCAMLC_OPTS) -c \$<
+EOF
+echo >> make
+ocamldep *.ml *.mli >> make
+make -f make coqextract.cmo coqextract.cmi
+cp coqextract.cmo coqextract.cmi ..
+cd ..

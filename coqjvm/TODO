@@ -1,0 +1,156 @@
+Documentation of coq source, especially interfaces:
+  - AnnotationIface
+  - ResourceAlgebra
+
+Documentation of annotations present in class files.
+
+Unimplemented parts of JVM, especially:
+  - arrays
+  - lookupswitch/tableswitch
+
+Check implementation matches JVM spec in places:
+  - dup2/dup2x1/pop2 on combinations of cat 1 and cat 2 values
+  - putstatic's handling of final fields (similar to putfield, needs updates to
+    verifier too)
+
+Should failure in *NativeMethods throw UnsatisfiedLinkError rather than
+going wrong?
+
+Should coqjvm enforce the resource limit as well as tracking it?
+
+Extra tool support for adding linking information.
+
+Older notes:
+------------
+
+Multiple annotations on constant pool entries
+
+Either change check_exception_handlers to claim that all exceptions
+are descended from java.lang.Exception, or stop athrow from requiring
+that all exceptions are descended from java.lang.Exception
+ -- FIXME in favour of putting j.l.Exception in check_exception_handlers when there is no handled type specified
+
+Checker must ensure:
+ - if we resolve a method C.f with spec A:
+   any non-abstract class D that is assignable to C has an implementation of f that satisfies A
+ 
+For a class C, check:
+ - if it overrides a method from a super class, then it does so safely
+ - if a class claims to implement an interface method with spec A,
+   then its actual implementation matches A, even if the
+   implementation is inherited from a super class. not all members of
+   the interface have to be implemented, but if they are implemented
+   in a sub-class they have to be checked then
+
+invokevirtual C.f
+ ==> resolve to D.f, with C <: D
+ ==> at runtime we have class A <: C
+ ==> lookup virtual method to B, with A <: B
+
+ so A <: D and A <: B
+  D has the resolved method
+  B has the actual method
+  if D is a class, then either:
+   - D <: B, but this is impossible because we would have found the
+   method in D, and not B (*) (and we know that D's one is not static)
+   - B <: D, so we know that B.f satisfies the spec of D.f
+  if D is an interface, then:
+   - B <: D, and we know that B implements all the methods of D
+   correctly
+   - D <: B, can't happen, since B is a class
+
+(*) need to show that lookup_virtual_method finds the least method in
+   the super class chain. 
+
+Need as invariant:
+ - if B <: D and B.f and D.f exist then B.f satisfies
+   the spec of D.f, no matter if D is an interface
+ - establish this by checking that overridden methods satisfy their
+   superclass's specs
+ - and that implementing methods satisfy the interface's specs
+   - go through all super interfaces, checking that if each one's
+   method exists then it satisfies the interface's spec
+
+Algorithm (for a class A):
+ 1. check all the methods in a class to ensure that they adhere to
+   their specs
+ 2. for each method:
+    - if it overrides one from a super class, then it overrides it
+   safely
+   i.e. if A.f and B.f exist (B a class) and A <:B then A.f is safe
+   for B.f
+ 3. for each super interface (even non-direct ones :( ):
+      for each method:
+        if it is implemented by A then it must be safe for the spec
+    i.e. if A.f and I.f exist and A <: I then A.f is safe for I.f
+
+
+Check interfaces before putting them in the classpool to ensure that
+   all their methods are public and abstract
+ - First step to doing verification?
+
+
+Adding resources to the JVM spec:
+ - Some module for mapping between resource constants needed for the spec and resource_atom_names?
+ - Just do 'new' for now, parameterised by the class name
+ - or add special resource consuming instructions?
+
+The resource aware verifier:
+ - copy what is in MemVerifier.v
+ - should work uniformly for all resource algebras
+ - annotations required:
+   - certificate annotations in code
+   - pre-/post-conditions on methods
+   - annotated constantpool entries for classes
+ - just do without method calls for now
+
+
+
+(* Specialising for resource verifier:
+ * - difficult bit is the proving that if a resolved method
+ *   matches a specification, then the method found via virtual method lookup is as well
+ * - otherwise, everything should be straightforward since we do not have to deal with
+ *   program variables, or the operand stack or anything
+ * - do not do it generically just now, concentrate on resources
+ *)
+
+(*
+ * The safety proof works by having a predicate safe state that says that:
+ * 1. the currently frame is safe:
+ *    (a) its class exists
+ *    (b) its code has been verified
+ *    (c) the current pc has an entry A in the certificate 
+ *    (d) the current state satisfies A, i.e. the local variables/opstack, the heap, the statics and the auxillary vars
+ * 2. the parent frames are safe
+ *    (a) the classes exist
+ *    (b) its code has been verified
+ *    (c) the current (S pc) has an entry A in the certificate
+ *    (d) if the child frame returns with some post state A' then A' -> A (with suitable adjustments for void/non-void returns)
+ *    (e) if the child frame throws an exception with some post state A' then A' -> the exception handlers
+ *
+ * [Stick with a single stack frame for now]
+ *
+ * 3. Some predicate about the classes and preclasses, which is preserved by only_add_from_preclasses and preserve_old
+ *)
+
+(* So several kinds of assertion:
+ * - internal method ones that can mention local variables, op stack, heap, statics and resource variables
+ * - method pre and post condition ones that can mention heap, statics and resource variables. Plus for post conditions can optionally mention the result value
+ * - assertions about the classes and preclasses (verification status, resolvedness status etc)
+ *)
+
+(* To prove that this is preserved, we must show that given a safe state, we either:
+ * - step into another safe state
+ * - stop in a safe state
+ * - stop with an exception in a safe state
+ * - go wrong -- some way of parameterising this so we can do a type checking verifier?
+ *)
+
+(* For a generic verifier we need:
+ * 1. assertion types for pre-/post-conditions and local assertions
+ * 2. for each instruction, a way of generating a verification condition from it given assertions for its successors
+ *)
+
+(* For generic verifier correctness, we need:
+ * 1. the instruction implementations all preserve safe_state given the vcgen definitions
+ *)
