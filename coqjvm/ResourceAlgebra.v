@@ -33,12 +33,8 @@ Hypothesis leq_refl     : forall r1 r2, r1 [=] r2 -> r1 <: r2.
 Hypothesis leq_antisymm : forall r1 r2, r1 <: r2 -> r2 <: r1 -> r1 [=] r2.
 Hypothesis leq_trans    : forall r1 r2 r3, r1 <: r2 -> r2 <: r3 -> r1 <: r3.
 
-Add Relation res leq
- reflexivity proved by leq_refl2
- transitivity proved by leq_trans as ra_leq_rel.
-
-Add Morphism leq with signature eq ==> eq ==> iff as leq_morphism.
-
+Declare Instance ra_leq_rel : PreOrder leq.
+Declare Instance leq_morphism : Morphisms.Proper (eq ==> eq ==> iff) leq.
 
 Parameter combine : res -> res -> res.
 Notation "e1 :*: e2" := (combine e1 e2) (at level 40, left associativity).
@@ -51,9 +47,8 @@ Hypothesis r_combine_e : forall r, r :*: e [=] r.
 Hypothesis combine_assoc : forall r1 r2 r3, r1 :*: (r2 :*: r3) [=] (r1 :*: r2) :*: r3.
 Hypothesis combine_symm  : forall r1 r2, r1 :*: r2 [=] r2 :*: r1.
 
-Add Morphism combine with signature  eq ==>  eq ==>  eq as combine_morphism.
-Add Morphism combine with signature leq ++> leq ++> leq as combine_order.
-
+Declare Instance combine_morphism_Proper : Morphisms.Proper (eq ==> eq ==> eq) combine.
+Declare Instance combine_order_Proper : Morphisms.Proper (leq ++> leq ++> leq) combine.
 
 Parameter bang : res -> res.
 Notation "! e" := (bang e) (at level 35, right associativity).
@@ -66,8 +61,8 @@ Hypothesis bang_combine : forall r1 r2, !(r1 :*: r2) [=] !r1 :*: !r2.
 
 Parameter r_new : RA_B.Classname.t -> option res.
 
-Add Morphism bang with signature  eq ==>  eq as bang_morphism.
-Add Morphism bang with signature leq ++> leq as bang_order.
+Declare Instance bang_morphism_Proper : Morphisms.Proper (eq ==> eq) bang.
+Declare Instance bang_order_Proper : Morphisms.Proper (leq ++> leq) bang.
 
 
 Fixpoint res_parse (expr:res_expr RA_B.Classname.t) :=
