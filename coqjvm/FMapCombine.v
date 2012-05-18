@@ -25,7 +25,7 @@ Definition combine (r1 r2 : M.t elt) : M.t elt :=
   M.fold combine_aux r1 r2.
 
 Lemma sorted_head_lowest : forall (x y:M.key*elt) (l:List.list (M.key*elt)),
-  Sorting.sort (M.lt_key (elt:=elt)) (List.cons y l) ->
+  sort (M.lt_key (elt:=elt)) (List.cons y l) ->
   SetoidList.InA (M.eq_key_elt (elt:=elt)) x l ->
   M.lt_key y x.
 Proof.
@@ -37,9 +37,9 @@ Proof.
     destruct y as [ky ey].
     destruct a as [ka ea].
     inversion intail as [p q eq|p q intail']; subst.
-      apply Sorting.sort_inv in sorted.
+      apply sort_inv in sorted.
       apply proj2 in sorted.
-      apply Sorting.lelistA_inv in sorted.
+      apply lelistA_inv in sorted.
       unfold M.lt_key in *.
       unfold M.eq_key_elt in *.
       simpl in *.
@@ -48,22 +48,22 @@ Proof.
       apply KeyFacts.lt_eq with (y:=ka); assumption.
 
       apply IHl.
-        apply Sorting.sort_inv in sorted.
+        apply sort_inv in sorted.
         destruct sorted as [sorted1 le1].
-        apply Sorting.lelistA_inv in le1.
-        apply Sorting.sort_inv in sorted1.
+        apply lelistA_inv in le1.
+        apply sort_inv in sorted1.
          destruct sorted1 as [sorted2 le2].
         inversion le2 as [|[k e] t].
-          apply Sorting.cons_sort.
-            apply Sorting.nil_sort.
+          apply cons_sort.
+            apply nil_sort.
         
-            apply Sorting.nil_leA.
+            apply nil_leA.
 
           subst.
-          apply Sorting.cons_sort.
+          apply cons_sort.
             assumption.
 
-            apply Sorting.cons_leA.
+            apply cons_leA.
             unfold M.lt_key.
             simpl.
             apply M.E.lt_trans with (y:=ka); assumption.
@@ -260,7 +260,7 @@ Proof.
           unfold M.eq_key_elt.
           split; [apply M.E.eq_sym;assumption|reflexivity].
 
-          apply Sorting.sort_inv in lsorted.
+          apply sort_inv in lsorted.
           destruct lsorted as [lsorted _].
           assumption.
 
@@ -282,7 +282,7 @@ Proof.
         apply maymapto_find in maps2.
         rewrite maps2.
         clear maps2.
-        apply Sorting.sort_inv in lsorted.
+        apply sort_inv in lsorted.
         destruct lsorted as [tsorted k'lt].
         set (m'mapsto := maymapto_add_1 k' (match e2 with
                     | Some e' => f e e'
@@ -305,23 +305,23 @@ Proof.
           simpl.
           unfold combine_aux at 2.
           simpl.
-          apply Sorting.sort_inv in tsorted.
+          apply sort_inv in tsorted.
           apply IHt0.
             destruct tsorted.
             assumption.
 
-            apply Sorting.lelistA_inv in k'lt.
+            apply lelistA_inv in k'lt.
             destruct tsorted as [_ le0].
             destruct le0.
-              apply Sorting.nil_leA.
+              apply nil_leA.
 
-              apply Sorting.cons_leA.
+              apply cons_leA.
               unfold M.lt_key in *.
               simpl in *.
               apply M.E.lt_trans with (y:=k0); assumption.
 
               apply maymapto_add_2.
-                apply Sorting.lelistA_inv in k'lt.
+                apply lelistA_inv in k'lt.
                 unfold M.lt_key in k'lt.
                 simpl in k'lt.
                 apply M.E.lt_not_eq in k'lt.
@@ -353,7 +353,7 @@ Proof.
 
           assumption.
 
-          apply Sorting.sort_inv in lsorted.
+          apply sort_inv in lsorted.
           apply (proj1 lsorted).
 Qed.
 
@@ -374,7 +374,7 @@ Proof.
     rewrite M.fold_1 in comb_mapsto.
     set (m2':=m2) in comb_mapsto.
     assert (Hm2 : M.In k m2' -> M.In k m2) by auto.
-    revert m2' Hm2 comb_mapsto.
+    revert dependent m2'.
     induction (M.elements m1).
       intros.
       simpl in *.
@@ -392,6 +392,8 @@ Proof.
         right.
         assumption.
 
+        assumption.
+
         intros [v mapsv].
         apply Hm2.
         exists v.
@@ -401,8 +403,6 @@ Proof.
           exists va. left. split; auto.
 
           apply mapsv.
-
-        assumption.
 Qed.
 
 Lemma combine_3 : forall k m1 m2,

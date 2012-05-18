@@ -114,7 +114,7 @@ assert (PositiveMap.MapsTo n o' h \/ a = n).
    apply in_added.
   right. assumption.
   left. eapply PositiveMap.add_3.
-   unfold not. intros. refine (PositiveMap.E.lt_not_eq l _). apply PositiveMap.E.eq_sym. apply H.
+   unfold not. intros. refine (PositiveMap.E.lt_not_eq _ _ l _). apply PositiveMap.E.eq_sym. apply H.
    apply in_added.
 destruct H.
  rewrite (PositiveMap.find_1 H) in n_nin_h. discriminate.

@@ -62,7 +62,7 @@ Definition chain_fix (T:key->Type)
   (err_notfound : forall k, T k)
   (f:(forall k:key, T k) -> forall k:key, {e : object | lookup s k = Some e}  -> T k)
   (k:key) :=
-  Store_chain_recurse.cfix object s T err_cycle err_notfound f k.
+  Store_chain_recurse.cfix T err_cycle err_notfound f k.
 
 Definition update (l:t) (k:key) (b:object) : t := St.add k b l.
 

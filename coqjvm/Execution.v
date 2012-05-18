@@ -18,34 +18,22 @@ Require Import NativeMethods.
 Require Import AnnotationIface.
 Require        FSetInterface.
 
-Module Execution (B0   : BASICS)
-                 (RA0  : RESOURCE_ALGEBRA B0)
-                 (ANN0 : ANNOTATION B0)
-                 (C0   : CLASSDATATYPES B0 ANN0)
-                 (CP0  : CLASSPOOL B0 ANN0 C0)
-                 (A0   : ASSIGNABILITY B0 ANN0 C0 CP0)
-                 (R0   : RESOLUTION B0 ANN0 C0 CP0 A0)
-                 (VM0  : VIRTUALMETHODLOOKUP B0 ANN0 C0 CP0 A0)
-                 (RDT0 : CERTRUNTIMETYPES B0 ANN0 C0 CP0 A0)
-                 (JVM0 : JVMSTATE B0 RA0 ANN0 C0 CP0 A0 R0 VM0 RDT0)
-                 (NAT0 : NATIVE_METHODS B0 RA0 ANN0 C0 CP0 A0 R0 VM0 RDT0 JVM0)
-                 (CLSNM0:FSetInterface.S with Definition E.t := B0.Classname.t with Definition E.eq := B0.Classname.eq).
+Module Execution (B    : BASICS)
+                 (RA   : RESOURCE_ALGEBRA B)
+                 (ANN  : ANNOTATION B)
+                 (C    : CLASSDATATYPES B ANN)
+                 (CP   : CLASSPOOL B ANN C)
+                 (A    : ASSIGNABILITY B ANN C CP)
+                 (R    : RESOLUTION B ANN C CP A)
+                 (VM   : VIRTUALMETHODLOOKUP B ANN C CP A)
+                 (RDT  : CERTRUNTIMETYPES B ANN C CP A)
+                 (JVM  : JVMSTATE B RA ANN C CP A R VM RDT)
+                 (NATIVE : NATIVE_METHODS B RA ANN C CP A R VM RDT JVM)
+                 (ClassnameSet :FSetInterface.S with Definition E.t := B.Classname.t with Definition E.eq := B.Classname.eq).
 
-Module B  := B0.
-Module C  := C0.
-Module CP := CP0.
-Module A  := A0.
-Module R  := R0.
-Module VM := VM0.
-Module RA := RA0.
-Module ANN := ANN0.
-Module JVM := JVM0.
-Module NATIVE := NAT0.
 
-Module ClassnameSet := CLSNM0.
-
-Import RDT0.
-Import JVM0.
+Import RDT.
+Import JVM.
 
 Section WithPreclasses.
 

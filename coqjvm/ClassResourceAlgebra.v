@@ -18,7 +18,6 @@ Module ClassResourceAlgebra (B : BASICS)
                             (F : FILTER B)
   <: RESOURCE_ALGEBRA B.
 
-Module RA_B := B.
 Module RA_F := F.
 
 Inductive count : Set :=
@@ -164,7 +163,7 @@ Qed.
 Lemma mapsto_eq (k : Res.key) (r : res) :
   forall c1:count, mapsto k c1 r -> forall c2:count, mapsto k c2 r -> c1 = c2.
 Proof.
-  intros k r c1 maps1 c2 maps2.
+  intros c1 maps1 c2 maps2.
   unfold mapsto in *.
   destruct maps1; destruct maps2.
     apply Res.find_1 in H.
@@ -352,7 +351,7 @@ Qed.
 Lemma combine_maps (k:Res.key) (c1 c2:count) (r1 r2:res) :
   mapsto k c1 r1 -> mapsto k c2 r2 -> mapsto k (count_sum c1 c2) (r1 :*: r2).
 Proof.
-  intros k c1 c2 r1 r2 maps1 maps2.
+  intros maps1 maps2.
 
   apply (proj2 (mapsto_maymapto k (count_sum c1 c2) (r1 :*: r2))).
   destruct (proj1 (mapsto_maymapto k c1 r1) maps1) as [c1' [maps1' val1]].
@@ -785,7 +784,7 @@ Qed.
 Definition r_new : B.Classname.t -> option res :=
   fun c => if F.f c then Some (Res.add c (Fin 1) (Res.empty count)) else None.
 
-Fixpoint res_parse (expr:res_expr RA_B.Classname.t) :=
+Fixpoint res_parse (expr:res_expr B.Classname.t) :=
   match expr with
     | List.nil => e
     | (List.cons (true,c) t) => match r_new c with None => res_parse t | Some r => (!r) :*: (res_parse t) end
