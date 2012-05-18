@@ -15,13 +15,9 @@ Set Implicit Arguments.
 Variable A:Type.
 Variable eqA:A->A->Prop.
 Variable eqA_dec: forall x y,{eqA x y} + {~ eqA x y}.
-Hypothesis eqA_refl : forall x, eqA x x.
-Hypothesis eqA_sym : forall x y, eqA x y -> eqA y x.
-Hypothesis eqA_trans : forall x y z, eqA x y -> eqA y z -> eqA x z.
+Hypothesis eqA_equiv : Equivalence eqA.
 
-Definition inclA (l m:list A) := forall a:A, InA eqA a l -> InA eqA a m.
-
-Lemma inclA_nil : forall l:list A, inclA l nil -> l = nil.
+Lemma inclA_nil : forall l:list A, inclA eqA l nil -> l = nil.
 Proof.
   induction l.
     reflexivity.
@@ -33,34 +29,34 @@ Proof.
 
       apply inc.
       apply InA_cons_hd.
-      apply eqA_refl.
+      reflexivity.
 Qed.
 
-Lemma inclA_cons (l l':list A) (a:A) : inclA (a::l) l' -> inclA l l'.
+Lemma inclA_cons (l l':list A) (a:A) : inclA eqA (a::l) l' -> inclA eqA l l'.
 Proof.
-  intros l l' a inc a' a'in.
+  intros inc a' a'in.
   apply inc.
   simpl.
   right.
   assumption.
 Qed.
 
-Lemma inclA_cons_1 (l l':list A) (a:A) : ~ InA eqA a l -> inclA l (a::l') -> inclA l l'.
+Lemma inclA_cons_1 (l l':list A) (a:A) : ~ InA eqA a l -> inclA eqA l (a::l') -> inclA eqA l l'.
 Proof.
-  intros l l' a anotinl inc a' a'in.
+  intros anotinl inc a' a'in.
   pose (a'in' := inc a' a'in).
   clearbody a'in'.
   inversion a'in' as [x y aa'|x y a'inl']. 
     subst x y.
-    apply (InA_eqA (l:=l) eqA_sym eqA_trans aa') in a'in.
+    apply (InA_eqA (l:=l) eqA_equiv aa') in a'in.
     contradiction.
 
     assumption.
 Qed.
 
-Lemma inclA_remove (l l':list A) (a:A) : inclA l l' -> inclA (removeA eqA_dec a l) l'.
+Lemma inclA_remove (l l':list A) (a:A) : inclA eqA l l' -> inclA eqA (removeA eqA_dec a l) l'.
 Proof.
-  intros l l' a inc a' a'in.
+  intros inc a' a'in.
   apply inc.
   induction l.
     simpl in *.
@@ -84,9 +80,9 @@ Proof.
           assumption.
 Qed.
 
-Lemma inclA_discard (l l':list A) (a:A) : inclA l (a::l') -> inclA (removeA eqA_dec a l) l'.
+Lemma inclA_discard (l l':list A) (a:A) : inclA eqA l (a::l') -> inclA eqA (removeA eqA_dec a l) l'.
 Proof.
-  intros l l' a inc a' a'in.
+  intros inc a' a'in.
   induction l.
     inversion a'in.
 
@@ -101,10 +97,9 @@ Proof.
       inversion a'in as [x y a'a0|x y]; subst x y.
         pose (a'ina0l := inc a' (InA_cons_hd (eqA:=eqA) (x:=a') (y:=a0) l a'a0)).
         inversion a'ina0l as [x y eq0|x y]; subst x y.
-          apply eqA_sym in eq0.
-          clear - eq0 a'a0 n eqA_trans.
-          apply (eqA_trans (z:=a0) eq0) in a'a0.
-          contradiction.
+          contradict n. 
+          transitivity a'; auto.
+          symmetry; assumption.
 
           assumption.
 
@@ -153,8 +148,7 @@ Module KeyFacts := OrderedType.OrderedTypeFacts M.E.
 Lemma InA_eq : forall l x y, M.E.eq x y -> InA M.E.eq x l -> InA M.E.eq y l.
 Proof.
   apply InA_eqA.
-  apply M.E.eq_sym.
-  apply M.E.eq_trans.
+  apply KeyFacts.eq_equiv.
 Qed.
 Implicit Arguments InA_eq [l x y].
 
@@ -176,7 +170,7 @@ Proof.
   induction l.
     reflexivity.
 
-    intros k notin.
+    intros notin.
     simpl.
     destruct (KeyFacts.eq_dec k a).
       destruct notin.
@@ -197,10 +191,10 @@ Lemma length_remove (l:list M.key) (k:M.key) :
   length l = S (length (removeA KeyFacts.eq_dec k l)).
 Proof.
   induction l.
-    intros k _ kin.
+    intros _ kin.
     inversion kin.
 
-    intros k nodup kin.
+    intros nodup kin.
     inversion kin as [x y kaeq|x y kinl]; subst x y.
       simpl.
       f_equal.
@@ -251,23 +245,23 @@ Proof.
         assumption.
 Qed.
 
-Lemma incl_length (l l':list M.key) : NoDupA M.E.eq l' -> inclA M.E.eq l' l -> length l' <= length l.
+Lemma incl_length (l:list M.key) : forall l':list M.key, NoDupA M.E.eq l' -> inclA M.E.eq l' l -> length l' <= length l.
 Proof.
   induction l; intros l' nodup inc.
-    apply inclA_nil in inc. 2: apply M.E.eq_refl.
+    apply inclA_nil in inc. 2: apply KeyFacts.eq_equiv.
     subst l'.
     simpl.
     apply Le.le_O_n.
 
     destruct (InA_dec KeyFacts.eq_dec a l').
-      rewrite (length_remove l' a nodup i) in *.
+      rewrite (length_remove nodup i) in *.
       simpl.
       apply Le.le_n_S.
       apply IHl.
         apply nodup_remove.
         assumption.
 
-        apply (inclA_discard KeyFacts.eq_dec M.E.eq_sym M.E.eq_trans).
+        apply (inclA_discard KeyFacts.eq_dec KeyFacts.eq_equiv).
         assumption.
 
     simpl.
@@ -276,10 +270,10 @@ Proof.
       assumption.
 
       apply inclA_cons_1 with (a:=a); auto.
-      apply M.E.eq_trans.
+      apply KeyFacts.eq_equiv.
 Qed.
 
-Lemma incl_length1 (l l':list M.key) (k:M.key) : InA M.E.eq k l -> ~ InA M.E.eq k l' -> NoDupA M.E.eq l' -> inclA M.E.eq l' l -> length l' < length l.
+Lemma incl_length1 (l:list M.key) : forall l':list M.key, forall k:M.key, InA M.E.eq k l -> ~ InA M.E.eq k l' -> NoDupA M.E.eq l' -> inclA M.E.eq l' l -> length l' < length l.
 Proof.
   induction l;
   intros l' k kinl knotinl' nodup incl.
@@ -288,7 +282,7 @@ Proof.
     inversion kinl; subst.
       simpl.
       apply Lt.le_lt_n_Sm.
-      apply inclA_cons_1 in incl; eauto using M.E.eq_trans.
+      apply inclA_cons_1 in incl; eauto using KeyFacts.eq_equiv.
         apply incl_length; assumption.
 
         intro badeq.
@@ -299,14 +293,14 @@ Proof.
       simpl.
       apply Lt.le_lt_trans with (m:=S (length (removeA KeyFacts.eq_dec a l'))).
         destruct (InA_dec KeyFacts.eq_dec a l').
-          rewrite <- (length_remove l' a).
+          rewrite <- length_remove.
             apply Le.le_refl.
 
             assumption.
 
             assumption.
 
-          rewrite <- (length_remove_1 l' a).
+          rewrite <- length_remove_1.
             apply Le.le_n_Sn.
             assumption.
 
@@ -320,7 +314,7 @@ Proof.
           apply nodup_remove.
           assumption.
 
-          apply inclA_discard with (a:=a); eauto.
+          apply inclA_discard with (a:=a); eauto using KeyFacts.eq_equiv.
 Qed.
 
 Lemma minus_lt : forall m n:nat, n < m -> m - S n < m - n.
@@ -340,15 +334,19 @@ Variable err_cycle : forall k:M.key, T k.
 Variable err_notfound : forall k:M.key, T k.
 Variable f:(forall k:M.key, T k) -> forall k:M.key, {e:elt | M.find k m = Some e} -> T k.
 
-Program Fixpoint fix_aux (l:list M.key | inclA M.E.eq l (keys m) /\ NoDupA M.E.eq l) (k:M.key) {measure (eltsleft m) l}
- : T k :=
+(* There's something odd going on with Program here.  I think it's a little
+   broken when the recursive call returns a function, so use the explicit
+   version to work around it. *)
+
+Program Fixpoint fix_aux (l:list M.key | inclA M.E.eq l (keys m) /\ NoDupA M.E.eq l) {measure (eltsleft m l)}
+ : forall k:M.key, T k := fun k =>
   match InA_dec KeyFacts.eq_dec k l with
     | left _ => err_cycle k
     | right _ =>
       let l' := k::l in
         match M.find k m with
           | None => err_notfound k
-          | Some v => f (fix_aux l') k v
+          | Some v => f (@fix_aux l' _) v
         end
   end.
 Next Obligation.
@@ -368,7 +366,7 @@ split.
       apply M.E.eq_sym.
       apply keq''.
     apply In_InA.
-      intro; apply M.E.eq_refl.
+      apply KeyFacts.eq_equiv.
     apply (proj2 (in_map_iff (fst (A:=M.key) (B:=elt)) (M.elements m) k'')).
     exists (k'',v).
     split.
@@ -376,7 +374,7 @@ split.
 
       assumption.
 
-    apply (proj1 H).
+    apply i.
     assumption.
 
   (* The nodup invariant *)
@@ -387,11 +385,10 @@ split.
 
       assumption.
 
-    apply (proj2 H).
+    apply n.
 Qed.
 Next Obligation.
   (* Termination via reducing measure. *)
-  destruct H as [linkeys lnodup].
   unfold eltsleft.
   simpl.
   apply minus_lt.
@@ -408,7 +405,7 @@ Next Obligation.
       apply M.E.eq_sym.
       apply keq.
     eapply In_InA.
-      apply M.E.eq_refl.
+      apply KeyFacts.eq_equiv.
     apply (proj2 (in_map_iff (fst (A:=M.key) (B:=elt)) (M.elements m) k'')).
     exists (k'',v).
     split.
