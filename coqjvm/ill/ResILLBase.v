@@ -135,7 +135,7 @@ Module SYN.
     | injection; intro; apply IHx with y; auto].
     Save.
     
-    Hint Unfold lt eq B.Classname.lt B.Classname.eq.
+    Hint Unfold lt eq B.Classname.eq.
     Hint Immediate eq_sym.
     Hint Resolve eq_refl eq_trans lt_trans lt_not_eq.
     Hint Constructors Compare.

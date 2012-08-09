@@ -49,7 +49,7 @@ Proof.
 
 Ltac tensor_breakup f var prf :=
   destruct prf as [prf_t [prf_U prf]];
-  apply implies_trans with (B:=f); unfold implies; do 2 eapply ex_intro;
+  apply implies_trans with (B:=f); unfold implies; do 2 eexists;
      [ eapply prf_tensor_elim;
        [ apply prf_lvar with (n:=0); simpl; reflexivity; apply VarSet.eq_refl
        | apply prf_lvar with (n:=var); simpl; reflexivity; apply VarSet.eq_refl
@@ -91,7 +91,7 @@ Ltac tensor_create f1 f2 prf prf' :=
   destruct prf as [prf_t [prf_U prf]];
   destruct prf' as [prf_t' [prf_U' prf']];
   apply implies_trans with (B:=(f_tensor f1 f2));
-  [ unfold implies; do 2 eapply ex_intro; eapply prf_tensor_intro;
+  [ unfold implies; do 2 eexists; eapply prf_tensor_intro;
     first [ apply prf_lvar with (n:=0); reflexivity
           | apply prf_i_intro; reflexivity
           | intros x xin; apply VarSet.inter_1 in xin; apply (VarSet.empty_1 xin)
@@ -99,7 +99,7 @@ Ltac tensor_create f1 f2 prf prf' :=
 (* Workaround for https://logical.futurs.inria.fr/coq-bugs/show_bug.cgi?id=1971 *)
           | match goal with |- context [SYN.VarSet.Equal _ _] => reflexivity end
           ]
-  | eapply implies_subformulae; try (unfold implies; do 2 eapply ex_intro); eauto].
+  | eapply implies_subformulae; try (unfold implies; do 2 eexists); eauto].
 
 
 
@@ -108,12 +108,12 @@ Ltac tensor_create f1 f2 prf prf' :=
   try (apply implies_refl) ;
   (compare (simplify f1) f_i; [intro s1; rewrite s1 in * | intro n1 |apply atom_eq_dec]); (compare (simplify f2) f_i; [intro s2; rewrite s2 in * | intro n2 |apply atom_eq_dec]); unfold implies;
   try solve
-  [ unfold implies; do 2 eapply ex_intro; apply prf_i_intro; apply VarSet.eq_refl
+  [ unfold implies; do 2 eexists; apply prf_i_intro; apply VarSet.eq_refl
   | tensor_breakup f2 1 IHf2
   | simplify_result f1; tensor_breakup f1 0 IHf1
   | simplify_result2 f1 f2 f_tensor; apply implies_subformulae; auto
   | apply implies_trans with (B:=(f_tensor f_i f_i));
-    [ unfold implies; do 2 eapply ex_intro; eapply prf_tensor_intro; 
+    [ unfold implies; do 2 eexists; eapply prf_tensor_intro; 
       first [apply prf_i_intro; reflexivity
             | intros x xin; apply VarSet.inter_1 in xin; apply (VarSet.empty_1 xin); reflexivity 
             | reflexivity]
@@ -125,41 +125,41 @@ Ltac tensor_create f1 f2 prf prf' :=
 ].
 
 apply implies_trans with (B:=f_and f1 (simplify f2)).
-apply implies_subformulae; unfold implies; eauto. do 2 eapply ex_intro. apply prf_lvar with (n:=0); reflexivity.
-unfold implies. do 2 eapply ex_intro. apply prf_and_elim2 with (A:=f1). eapply prf_lvar with (n:=0); reflexivity.
+apply implies_subformulae; unfold implies; eauto. do 2 eexists. apply prf_lvar with (n:=0); reflexivity.
+unfold implies. do 2 eexists. apply prf_and_elim2 with (A:=f1). eapply prf_lvar with (n:=0); reflexivity.
 
 simplify_result f1.
 apply implies_trans with (B:=f_and (simplify f1) f2).
-apply implies_subformulae; unfold implies; eauto. do 2 eapply ex_intro. apply prf_lvar with (n:=0); reflexivity.
-unfold implies. do 2 eapply ex_intro. apply prf_and_elim1 with (B:=f2). eapply prf_lvar with (n:=0); reflexivity.
+apply implies_subformulae; unfold implies; eauto. do 2 eexists. apply prf_lvar with (n:=0); reflexivity.
+unfold implies. do 2 eexists. apply prf_and_elim1 with (B:=f2). eapply prf_lvar with (n:=0); reflexivity.
 
 destruct (formula_eq_dec (simplify f1) (simplify f2)).
   match goal with |- context [prf nil _ _ ?X _] => replace X with (simplify f1) end.
    apply implies_trans with (B:=f_and (simplify f1) (simplify f2)).
    apply implies_subformulae; unfold implies; eauto.
-   do 2 eapply ex_intro. eapply prf_and_elim1. apply prf_lvar with (n:=0); reflexivity.
+   do 2 eexists. eapply prf_and_elim1. apply prf_lvar with (n:=0); reflexivity.
 
    destruct (simplify f1); destruct (simplify f2); intuition.
 
   simplify_result2 f1 f2 f_and.  apply implies_subformulae; unfold implies; eauto.
 
 apply implies_trans with (B:=f_and f_i f_i).
-unfold implies; do 2 eapply ex_intro. eapply prf_and_intro. apply prf_i_intro; reflexivity.  apply prf_i_intro; reflexivity. reflexivity.
+unfold implies; do 2 eexists. eapply prf_and_intro. apply prf_i_intro; reflexivity.  apply prf_i_intro; reflexivity. reflexivity.
 apply implies_subformulae; unfold implies; eauto.
 
 apply implies_trans with (B:=f_and f_i (simplify f2)).
-unfold implies. do 2 eapply ex_intro. eapply prf_and_intro. apply prf_i_intro;reflexivity. apply prf_lvar with (n:=0); reflexivity. reflexivity.
+unfold implies. do 2 eexists. eapply prf_and_intro. apply prf_i_intro;reflexivity. apply prf_lvar with (n:=0); reflexivity. reflexivity.
 apply implies_subformulae; unfold implies; eauto. 
 
 simplify_ctx f1.
 apply implies_trans with (B:=f_and (simplify f1) f_i).
-unfold implies. do 2 eapply ex_intro. eapply prf_and_intro. apply prf_lvar with (n:=0); reflexivity. apply prf_i_intro;reflexivity. reflexivity.
+unfold implies. do 2 eexists. eapply prf_and_intro. apply prf_lvar with (n:=0); reflexivity. apply prf_i_intro;reflexivity. reflexivity.
 apply implies_subformulae; unfold implies; eauto. 
 
 destruct (formula_eq_dec (simplify f1) (simplify f2)).
   match goal with |- context [prf nil (?X::nil) _ _ _] => replace X with (simplify f1) end.
    apply implies_trans with (B:=f_and (simplify f1) (simplify f2)).
-   do 2 eapply ex_intro. eapply prf_and_intro.
+   do 2 eexists. eapply prf_and_intro.
     apply prf_lvar with (n:=0); reflexivity.
     rewrite e. apply prf_lvar with (n:=0); reflexivity.
     reflexivity.
@@ -172,7 +172,7 @@ destruct (formula_eq_dec (simplify f1) (simplify f2)).
 
 apply implies_trans with (B:=f2).
 destruct IHf1' as [t1' [U1' p1']]. 
-unfold implies. do 2 eapply ex_intro.  eapply prf_lolli_elim. apply prf_lvar with (n:=0); simpl; reflexivity.
+unfold implies. do 2 eexists.  eapply prf_lolli_elim. apply prf_lvar with (n:=0); simpl; reflexivity.
 eapply prf_let. apply prf_i_intro. reflexivity.
 change (f_i::f_lolli f1 f2 :: nil) with ((f_i::nil)++(f_lolli f1 f2::nil)).
 apply proof_weakening. apply p1'.
@@ -183,16 +183,16 @@ apply shift_down_In. apply VarSet.inter_2 in xin. destruct (VarSet.union_1 xin).
 destruct (VarSet.empty_1 H). assumption. reflexivity.
 assumption.
 
-destruct (simplify f1); do 2 eapply ex_intro; apply prf_i_intro; reflexivity.
+destruct (simplify f1); do 2 eexists; apply prf_i_intro; reflexivity.
 
 destruct (formula_eq_dec (simplify f1) (simplify f2)).
  match goal with |- context [prf nil _ _ ?X _] => replace X with f_i end.
-  do 2 eapply ex_intro. apply prf_i_intro. reflexivity.
+  do 2 eexists. apply prf_i_intro. reflexivity.
   destruct (simplify f1); destruct (simplify f2); tauto.
 
  simplify_result2 f1 f2 f_lolli.
  destruct IHf1' as [t1 [U1 p1]]. destruct IHf2 as [t2 [U2 p2]].
- do 2 eapply ex_intro. eapply prf_lolli_intro. eapply prf_let.
+ do 2 eexists. eapply prf_lolli_intro. eapply prf_let.
  change (simplify f1 :: f_lolli f1 f2 :: nil) with ((simplify f1::nil)++(f_lolli f1 f2 :: nil)).
  apply proof_weakening. apply p1.
  eapply prf_let. eapply prf_lolli_elim. apply prf_lvar with (n:=2). simpl. reflexivity. reflexivity.
@@ -217,18 +217,18 @@ destruct (formula_eq_dec (simplify f1) (simplify f2)).
  reflexivity. reflexivity.
 
 apply implies_trans with (B:=f2). assumption.
-unfold implies. do 2 eapply ex_intro. eapply prf_lolli_intro. apply prf_lvar with (n:=1). reflexivity. reflexivity. reflexivity.
+unfold implies. do 2 eexists. eapply prf_lolli_intro. apply prf_lvar with (n:=1). reflexivity. reflexivity. reflexivity.
 
 apply implies_trans with (B:=f2). assumption.
-unfold implies. do 2 eapply ex_intro. eapply prf_lolli_intro. apply prf_lvar with (n:=1). reflexivity. reflexivity. reflexivity.
+unfold implies. do 2 eexists. eapply prf_lolli_intro. apply prf_lvar with (n:=1). reflexivity. reflexivity. reflexivity.
 
 apply implies_trans with (B:=f2). destruct (simplify f1); assumption.
-unfold implies. do 2 eapply ex_intro. eapply prf_lolli_intro. apply prf_lvar with (n:=1). reflexivity. reflexivity. reflexivity.
+unfold implies. do 2 eexists. eapply prf_lolli_intro. apply prf_lvar with (n:=1). reflexivity. reflexivity. reflexivity.
 
 destruct IHf1 as [t1 [U1 p1]]. destruct IHf2' as [t2 [U2 p2]].
 destruct (formula_eq_dec (simplify f1) (simplify f2)).
  match goal with |- context [prf nil (?X::nil) _ _ _] => replace X with f_i end.
- do 2 eapply ex_intro. eapply prf_lolli_intro.
+ do 2 eexists. eapply prf_lolli_intro.
  eapply prf_let.
   change (f1::f_i::nil) with ((f1::nil)++(f_i::nil)).
   apply proof_weakening. apply p1.
@@ -249,7 +249,7 @@ destruct (formula_eq_dec (simplify f1) (simplify f2)).
   assert (r=f_lolli (simplify f1) (simplify f2)).
   destruct (simplify f1); try (destruct n1; reflexivity); destruct (simplify f2); try (destruct n2; reflexivity); simpl; reflexivity. 
   clearbody r.
- do 2 eapply ex_intro.  eapply prf_lolli_intro.
+ do 2 eexists.  eapply prf_lolli_intro.
  eapply prf_let.
    change (f1::r::nil) with ((f1::nil)++(r::nil)).
   apply proof_weakening. apply p1.

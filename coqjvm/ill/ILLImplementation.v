@@ -83,7 +83,8 @@ Fixpoint l_subst (t:prf_term) (s:prf_term) (j:nat) {struct t} : prf_term :=
  | t_let t1 t2          => t_let (l_subst t1 s j) (l_subst t2 (l_shift 1 0 s) (S j))
  end.
 
-Module VarSet : FSetInterface.S with Module E := Nat_as_OT := FSetAVL.Make Nat_as_OT.
+Module VarSet <: FSetInterface.Sfun Nat_as_OT := FSetAVL.Make Nat_as_OT.
+(*Module VarSet : FSetInterface.S with Module E := Nat_as_OT := FSetAVL.Make Nat_as_OT.*)
 
 Definition shift_step n s := match n with O => s | S n => VarSet.add n s end.
 Definition shift_down s := VarSet.fold shift_step s VarSet.empty.
@@ -174,24 +175,26 @@ Add Morphism prf with signature (@eq context) ==> (@eq context) ==> (@eq prf_ter
 intuition eauto using prf_mor_aux, VarSetProps.equal_sym.
 Save.
 
+Add Morphism shift_step with signature (@eq nat) ==> VarSet.Equal ==> VarSet.Equal as shift_step_mor.
+intros. unfold shift_step. destruct y.
+  assumption.
+  rewrite H. reflexivity.
+Save.
+
 Add Morphism shift2_step with signature (@eq nat) ==> (@eq nat) ==> (@eq nat) ==> VarSet.Equal ==> VarSet.Equal as shift2_step_mor.
 unfold shift2_step. intros. destruct (le_lt_dec y0 y1); rewrite H; reflexivity.
 Save.
 
 Add Morphism shift_varset with signature (@eq nat) ==> (@eq nat) ==> VarSet.Equal ==> VarSet.Equal as shift_varset_mor.
 unfold shift_varset. intros. refine (VarSetProps.fold_equal varset_setoid _ _ _ H).
- unfold compat_op. intros. unfold VarSet.E.eq in H0. subst x'. apply shift2_step_mor; try reflexivity. assumption.
+ unfold compat_op. apply shift2_step_mor_Proper; auto.
  unfold transpose. intros. unfold shift2_step.
  destruct (le_lt_dec y0 x0); destruct (le_lt_dec y0 y2); rewrite VarSetProps.add_add; reflexivity.
 Save.
 
 Add Morphism shift_down with signature VarSet.Equal ==> VarSet.Equal as shift_down_mor.
 unfold shift_down. intros. refine (VarSetProps.fold_equal varset_setoid _ _ _ H).
- unfold compat_op. unfold shift_step. intros. destruct x0; destruct x'.
-  assumption.
-  discriminate.
-  discriminate. 
-  inversion H0. rewrite H1. reflexivity.
+ unfold compat_op. apply shift_step_mor_Proper.
  unfold transpose. intros. unfold shift_step.
  destruct x0; destruct y0; try reflexivity; eauto using VarSetProps.add_add.
 Save.
@@ -222,7 +225,7 @@ destruct l; intros.
  subst. destruct l.
   reflexivity.
   assert (n = y). rewrite <- H. right. constructor. reflexivity.
-  subst. inversion H0. inversion H4. elimtype False. refine (Nat_as_OT.lt_not_eq _ _ H6 _). unfold Nat_as_OT.eq. reflexivity.
+  subst. inversion H0. inversion H4. elimtype False. refine (Nat_as_OT.lt_not_eq H6 _). unfold Nat_as_OT.eq. reflexivity.
 Save. 
 
 Lemma elements_singleton : forall n, VarSet.elements (VarSet.singleton n) = n::nil.
@@ -295,9 +298,12 @@ unfold VarSet.Empty. unfold not. intros.
 eapply H. apply VarSet.add_1. reflexivity.
 Save.
 
+(* Hmm... the hintsdb for set seems to be screwed up with 8.3. *)
+Hint Resolve VarSet.add_1 VarSet.add_2 VarSet.add_3 : set.
+
 Lemma add_equal : forall x s s', VarSetProps.Add x s s' -> VarSet.Equal s' (VarSet.add x s).
 intros. unfold VarSetProps.Add in H. unfold VarSet.Equal. intro. split; intro.
- rewrite H in H0. intuition auto with set.
+ rewrite H in H0. intuition eauto with set.
  rewrite H. destruct (eq_nat_dec x a); [left|right]; eauto with set.
 Save.
 
@@ -376,11 +382,11 @@ Proof.
  intros. subst n'. unfold shift_varset. apply VarSet.elements_1 in H. rewrite VarSet.fold_1. set (l:=VarSet.elements s) in *. generalize VarSet.empty. clearbody l. induction l.
   inversion H.
   inversion H; subst.
-   unfold VarSet.E.eq in H1. subst a. intros. simpl. set (r:=shift2_step d c n t) in *.  assert (VarSet.In (if le_lt_dec c n then d + n else n) r).
-    unfold r. unfold shift2_step. destruct (le_lt_dec c n); apply VarSet.add_1; reflexivity.
+   intros. simpl. set (r:=shift2_step d c a t) in *.  assert (VarSet.In (if le_lt_dec c a then d + a else a) r).
+    unfold r. unfold shift2_step. destruct (le_lt_dec c a); apply VarSet.add_1; reflexivity.
     clearbody r. generalize r H0. clear. induction l; intros.
      simpl. assumption.
-     simpl. apply IHl. unfold shift2_step. destruct (le_lt_dec c a); apply VarSet.add_2; assumption.
+     simpl. apply IHl. unfold shift2_step. destruct (le_lt_dec c a0); apply VarSet.add_2; assumption.
    intros. simpl. apply IHl. assumption.
 Qed.
 
@@ -417,7 +423,7 @@ Lemma shift_varset_add : forall d c x s,
   VarSet.Equal (shift_varset d c (VarSet.add x s)) (shift2_step d c x (shift_varset d c s)).
 intros. unfold shift_varset. apply VarSetProps.fold_add.
  apply varset_setoid.
- unfold compat_op. intros. unfold VarSet.E.eq in H0. subst x0. apply shift2_step_mor; auto.
+ unfold compat_op. apply shift2_step_mor_Proper; auto.
  unfold transpose. intros. unfold shift2_step.
  destruct (le_lt_dec c x0); destruct (le_lt_dec c y); rewrite VarSetProps.add_add; reflexivity.
  assumption.
@@ -428,11 +434,7 @@ Lemma shift_down_add : forall x s,
  VarSet.Equal (shift_down (VarSet.add x s)) (shift_step x (shift_down s)).
 intros. unfold shift_down. apply VarSetProps.fold_add.
  apply varset_setoid.
- unfold compat_op. unfold shift_step. intros. destruct x0; destruct x'.
-  assumption.
-  discriminate.
-  discriminate. 
-  inversion H0. rewrite H1. reflexivity.
+ unfold compat_op. apply shift_step_mor_Proper. 
  unfold transpose. intros. unfold shift_step.
  destruct x0; destruct y; try reflexivity; eauto using VarSetProps.add_add.
  assumption.
@@ -516,7 +518,7 @@ Proof.
   intros n U H. apply VarSet.elements_1 in H. unfold shift_down. rewrite VarSet.fold_1. set (l:=VarSet.elements U) in *. clearbody l. clear U. generalize VarSet.empty. induction l.
    inversion H.
    intro s0. simpl. inversion H; subst.
-    change VarSet.E.eq with (eq (A:=nat)) in H1. subst a. simpl.   set (s1:=VarSet.add n s0). assert (VarSet.In n s1) by (unfold s1; apply VarSet.add_1; reflexivity). generalize s1 H0. clear . induction l; intros.
+    simpl. set (s1:=VarSet.add n s0). assert (VarSet.In n s1) by (unfold s1; apply VarSet.add_1; reflexivity). generalize s1 H0. clear . induction l; intros.
      simpl. assumption.
      simpl. assert (VarSet.In n (shift_step a s1)) by (unfold shift_step; destruct a; auto using VarSet.add_2). apply IHl. assumption.
     apply IHl. assumption.
@@ -920,7 +922,7 @@ Lemma implies_trans : forall A B C, implies A B -> implies B C -> implies A C.
 
 intros A B C [tAB [UAB pAB]] [tBC [UBC pBC]].
 exists (t_lolli_elim (t_lolli_intro B (l_shift (length (A::nil)) (length (B::nil)) tBC)) tAB).
-eapply ex_intro.
+eexists.
 (*assert (prf nil (B::A::nil) (t_lolli_intro B (l_shift (length (A::nil)) (length (B::nil)) tBC)) (f_lolli B C) *)
 eapply prf_lolli_elim.
   eapply prf_lolli_intro.
@@ -955,22 +957,22 @@ Lemma subst_and_1 : forall Gi G G' A C t B U,
   exists t', prf Gi (G++(f_and A C)::G') t' B U.
 Proof.
   intros. set (G0:=(G++A::G')) in *. assert (G0 = (G++A::G')) by reflexivity. generalize G H0. clear H0. induction H; intros.
-  eapply ex_intro; eauto using prf_ivar.
-   compare n (length G1); intro; eapply ex_intro.
+  eexists; eauto using prf_ivar.
+   compare n (length G1); intro; eexists.
     eapply prf_and_elim1. rewrite e in H. rewrite H1 in H. rewrite lookup_length in H. injection H as H'. subst A0. apply prf_lvar.
      apply lookup_length.
      rewrite <- e. assumption.
     apply prf_lvar. rewrite <- H. rewrite H1. apply lookup_neq. assumption. assumption.
-  eapply ex_intro. eauto using prf_i_intro.
-  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eapply ex_intro; eapply prf_tensor_intro; eauto.
+  eexists. eauto using prf_i_intro.
+  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eexists; eapply prf_tensor_intro; eauto.
   destruct (IHprf1 G1 H3); destruct (IHprf2 (A0::B::G1)). rewrite H3. simpl. reflexivity. eauto using prf_tensor_elim.
-  destruct (IHprf1 G1 H2); destruct (IHprf2 G1 H2); eapply ex_intro; eapply prf_and_intro; eauto.
+  destruct (IHprf1 G1 H2); destruct (IHprf2 G1 H2); eexists; eapply prf_and_intro; eauto.
   destruct (IHprf G1 H0); eauto using prf_and_elim1.
   destruct (IHprf G1 H0); eauto using prf_and_elim2.
   destruct (IHprf (A0::G1)). rewrite H1. simpl. reflexivity. eauto using prf_lolli_intro.
-  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eapply ex_intro; eauto using prf_lolli_elim.
+  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eexists; eauto using prf_lolli_elim.
   destruct (IHprf G1 H1); eauto using prf_bang_intro.
-  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eapply ex_intro; eauto using prf_bang_elim.
+  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eexists; eauto using prf_bang_elim.
   destruct (IHprf G1 H0); eauto using prf_axiom.
   destruct (IHprf1 G1 H4); destruct (IHprf2 (A0::G1)). rewrite H4. simpl. reflexivity. eauto using prf_let.
 Qed.
@@ -979,22 +981,22 @@ Lemma subst_and_2 : forall Gi G G' A C t B U,
   exists t', prf Gi (G++(f_and C A)::G') t' B U.
 Proof.
   intros. set (G0:=(G++A::G')) in *. assert (G0 = (G++A::G')) by reflexivity. generalize G H0. clear H0. induction H; intros.
-  eapply ex_intro; eauto using prf_ivar.
-   compare n (length G1); intro; eapply ex_intro.
+  eexists; eauto using prf_ivar.
+   compare n (length G1); intro; eexists.
     eapply prf_and_elim2. rewrite e in H. rewrite H1 in H. rewrite lookup_length in H. injection H as H'. subst A0. apply prf_lvar.
      apply lookup_length.
      rewrite <- e. assumption.
     apply prf_lvar. rewrite <- H. rewrite H1. apply lookup_neq. assumption. assumption.
-  eapply ex_intro. eauto using prf_i_intro.
-  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eapply ex_intro; eapply prf_tensor_intro; eauto.
+  eexists. eauto using prf_i_intro.
+  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eexists; eapply prf_tensor_intro; eauto.
   destruct (IHprf1 G1 H3); destruct (IHprf2 (A0::B::G1)). rewrite H3. simpl. reflexivity. eauto using prf_tensor_elim.
-  destruct (IHprf1 G1 H2); destruct (IHprf2 G1 H2); eapply ex_intro; eapply prf_and_intro; eauto.
+  destruct (IHprf1 G1 H2); destruct (IHprf2 G1 H2); eexists; eapply prf_and_intro; eauto.
   destruct (IHprf G1 H0); eauto using prf_and_elim1.
   destruct (IHprf G1 H0); eauto using prf_and_elim2.
   destruct (IHprf (A0::G1)). rewrite H1. simpl. reflexivity. eauto using prf_lolli_intro.
-  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eapply ex_intro; eauto using prf_lolli_elim.
+  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eexists; eauto using prf_lolli_elim.
   destruct (IHprf G1 H1); eauto using prf_bang_intro.
-  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eapply ex_intro; eauto using prf_bang_elim.
+  destruct (IHprf1 G1 H3); destruct (IHprf2 G1 H3); eexists; eauto using prf_bang_elim.
   destruct (IHprf G1 H0); eauto using prf_axiom.
   destruct (IHprf1 G1 H4); destruct (IHprf2 (A0::G1)). rewrite H4. simpl. reflexivity. eauto using prf_let.
 Qed.
@@ -1005,7 +1007,7 @@ Lemma implies_subformulae : forall f1 f2 f1' f2' fo,
   implies (fo f1 f2) (fo f1' f2').
 Proof.
  intros until fo. intros [t1 [U1 p1]] [t2 [U2 p2]] [fo_eq|fo_eq]; subst fo.
- unfold implies. do 2 eapply ex_intro.
+ unfold implies. do 2 eexists.
  eapply prf_tensor_elim.
   apply prf_lvar with (n:=0).
    simpl. reflexivity.
@@ -1029,7 +1031,7 @@ Proof.
  unfold implies.
  change (f1::nil) with (nil++(f1::nil)++nil) in p1. destruct (subst_and_1 _ _ _ f2 p1). simpl in H.
  change (f2::nil) with (nil++(f2::nil)++nil) in p2. destruct (subst_and_2 _ _ _ f1 p2). simpl in H0.
- do 2 eapply ex_intro. eapply prf_and_intro.
+ do 2 eexists. eapply prf_and_intro.
   apply H.
   apply H0.
   reflexivity.
@@ -1040,7 +1042,7 @@ Lemma implies_lolli : forall f1 f2 f1' f2',
   implies (f_lolli f1' f2) (f_lolli f1 f2').
 Proof.
  intros f1 f2 f1' f2' [t1 [U1 p1]] [t2 [U2 p2]].
- unfold implies. do 2 eapply ex_intro. eapply prf_lolli_intro.
+ unfold implies. do 2 eexists. eapply prf_lolli_intro.
   eapply prf_lolli_elim.
 *)
 Definition proof_check_single (A B:formula) (t:prf_term)
@@ -1363,7 +1365,7 @@ Save.
 
 Definition fold_left_shift := fold_left (fun a b => shift_step b a).
 
-Add Morphism fold_left_shift : fold_left_morphism.
+Add Morphism fold_left_shift with signature Logic.eq ==> VarSet.Equal ==> VarSet.Equal as fold_left_morphism.
 intro l. induction l; intros; simpl.
  assumption.
  apply IHl. apply shift_step_morphism. assumption.
@@ -1530,7 +1532,7 @@ induction G; intros.
    eapply IHG.
     apply H.
     exists r2. intuition.
-     apply bang_order. eapply left_weaken. apply r1r2_r.
+     apply bang_order_Proper. eapply left_weaken. apply r1r2_r.
    apply r'_r1.
 Save.
 

@@ -49,6 +49,7 @@ Hypothesis combine_symm  : forall r1 r2, r1 :*: r2 [=] r2 :*: r1.
 
 Declare Instance combine_morphism_Proper : Morphisms.Proper (eq ==> eq ==> eq) combine.
 Declare Instance combine_order_Proper : Morphisms.Proper (leq ++> leq ++> leq) combine.
+Hypothesis combine_order : forall x y, x <: y -> forall x0 y0, x0 <: y0 -> x :*: x0 <: y :*: y0.
 
 Parameter bang : res -> res.
 Notation "! e" := (bang e) (at level 35, right associativity).

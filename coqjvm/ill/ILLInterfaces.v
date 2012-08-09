@@ -55,12 +55,12 @@ Inductive prf_term : Set :=
 | t_axiom        : axiom_name -> prf_term -> prf_term
 | t_let          : prf_term -> prf_term -> prf_term.
 
-Declare Module VarSet : FSetInterface.S with Module E := Nat_as_OT.
+Declare Module VarSet : FSetInterface.S with Definition E.t := nat with Definition E.eq := (@eq nat).
 Module VarSetProps := Properties VarSet.
 
 Definition shift_step n s := match n with O => s | S n => VarSet.add n s end.
 Definition shift_down s := VarSet.fold shift_step s VarSet.empty.
-Add Morphism shift_down with signature VarSet.Equal ==> VarSet.Equal as shift_down_mor.
+Declare Instance shift_down_mor_Proper : Proper (VarSet.Equal ==> VarSet.Equal) shift_down.
 Parameter In_shift_down : forall n U,  VarSet.In (S n) U -> VarSet.In n (shift_down U).
 Parameter shift_down_In : forall n U,  VarSet.In n (shift_down U) -> VarSet.In (S n) U.
 
