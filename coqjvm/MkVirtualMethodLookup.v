@@ -9,6 +9,9 @@ Require        BoolExt.
 
 Require Import AnnotationIface.
 
+(* TODO: remove *)
+Set Asymmetric Patterns.
+
 Module MkVirtualMethodLookup (B  : BASICS)
                              (ANN : ANNOTATION B)
                              (C  : CLASSDATATYPES B ANN)

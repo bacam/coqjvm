@@ -173,11 +173,11 @@ intros. apply (option_relation_symmetry O.t O.eq); auto.
 Save.
 
 Lemma eq_trans : forall x y z, eq x y -> eq y z -> eq x z.
-intros. refine (option_relation_transitivity O.t O.eq _ _ _ _ _ _); eauto.
+apply (option_relation_transitivity O.t O.eq); eauto.
 Save.
 
 Lemma lt_trans : forall x y z, lt x y -> lt y z -> lt x z.
-intros. refine (option_relation2_transitivity O.t O.lt _ _ _ _ _ _); eauto.
+apply (option_relation2_transitivity O.t O.lt); eauto.
 Save.
 
 Lemma lt_not_eq : forall x y, lt x y -> ~eq x y.
@@ -215,7 +215,7 @@ Hint Resolve U.lt_trans U.lt_not_eq f_equal.
 Hint Unfold transitive symmetric reflexive U.eq eq.
 
 Lemma lt_trans : forall x y z, lt x y -> lt y z -> lt x z.
-intros. refine (option_relation2_transitivity U.t U.lt _ _ _ _ _ _); eauto.
+apply (option_relation2_transitivity U.t U.lt); eauto.
 Save.
 
 Lemma lt_not_eq : forall x y, lt x y -> ~eq x y.
@@ -262,12 +262,12 @@ intros. apply (list_relation_symmetry O.t O.eq); auto.
 Save.
 
 Lemma eq_trans : forall x y z, eq x y -> eq y z -> eq x z.
-intros. refine (list_relation_transitivity O.t O.eq _ _ _ _ _ _); eauto.
+apply (list_relation_transitivity O.t O.eq); eauto.
 Save.
 
 Lemma lt_trans : forall x y z, lt x y -> lt y z -> lt x z.
-intros. refine (list_relation2_transitivity O.t O.eq _ _ _ _ _ _ _ _ _ _ _); eauto.
- intros. eapply OFacts.lt_eq; eauto.
+apply (list_relation2_transitivity O.t O.eq); eauto.
+intros. eapply OFacts.lt_eq; eauto.
 Save.
 
 Lemma lt_not_eq : forall x y, lt x y -> ~eq x y.
@@ -303,8 +303,8 @@ Hint Unfold transitive symmetric reflexive U.eq eq.
 Hint Immediate U.eq_sym.
 
 Lemma lt_trans : forall x y z, lt x y -> lt y z -> lt x z.
-intros. refine (list_relation2_transitivity U.t U.eq _ _ _ _ _ _ _ _ _ _ _); eauto;
- unfold U.eq; intros; subst; assumption.
+apply list_relation2_transitivity; eauto;
+unfold U.eq; intros; subst; assumption.
 Save.
 
 Lemma lt_not_eq : forall x y, lt x y -> ~eq x y.

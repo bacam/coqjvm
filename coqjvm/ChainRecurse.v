@@ -1,7 +1,6 @@
 Require Import FMapInterface.
 Require Import List.
 Require Import SetoidList.
-Require Import TheoryList.
 Require Import Omega.
 Require Program.Tactics.
 Require Program.Wf.
@@ -354,11 +353,11 @@ split.
   (* The incl invariant *)
   intros x inkl.
   inversion inkl as [y z xeq|y z xin]; subst y z.
-    apply sym_eq in Heq_anonymous0.
-    apply M.find_2 in Heq_anonymous0.
-    apply M.elements_1 in Heq_anonymous0.
+    apply sym_eq in Heq_anonymous.
+    apply M.find_2 in Heq_anonymous.
+    apply M.elements_1 in Heq_anonymous.
     unfold keys.
-    destruct (proj1 (InA_alt (M.eq_key_elt (elt:=elt)) (k,v) (M.elements m)) Heq_anonymous0) as [[k'' v''] [[keq'' veq''] in'']].
+    destruct (proj1 (InA_alt (M.eq_key_elt (elt:=elt)) (k,v) (M.elements m)) Heq_anonymous) as [[k'' v''] [[keq'' veq''] in'']].
     simpl in keq'', veq''.
     subst v''.
     apply (M.E.eq_trans (z:=k'') xeq) in keq''.
@@ -393,10 +392,10 @@ Next Obligation.
   simpl.
   apply minus_lt.
   apply incl_length1 with (k:=k).
-    apply sym_eq in Heq_anonymous0.
-    apply M.find_2 in Heq_anonymous0.
-    apply M.elements_1 in Heq_anonymous0.
-    destruct (proj1 (InA_alt (M.eq_key_elt (elt:=elt)) (k,v) (M.elements m)) Heq_anonymous0) as [[k'' v''] [eq xvin]].
+    apply sym_eq in Heq_anonymous.
+    apply M.find_2 in Heq_anonymous.
+    apply M.elements_1 in Heq_anonymous.
+    destruct (proj1 (InA_alt (M.eq_key_elt (elt:=elt)) (k,v) (M.elements m)) Heq_anonymous) as [[k'' v''] [eq xvin]].
     destruct eq as [keq veq].
     simpl in *.
     subst v''.

@@ -11,6 +11,9 @@ Require        BoolExt.
 
 Require Import AnnotationIface.
 
+(* TODO: remove *)
+Set Asymmetric Patterns.
+
 Module MkResolution (B : BASICS)
                     (ANN : ANNOTATION B)
                     (C : CLASSDATATYPES B ANN)

@@ -18,6 +18,9 @@ Require Import NativeMethods.
 Require Import AnnotationIface.
 Require        FSetInterface.
 
+(* TODO: remove *)
+Set Asymmetric Patterns.
+
 Module Execution (B    : BASICS)
                  (RA   : RESOURCE_ALGEBRA B)
                  (ANN  : ANNOTATION B)

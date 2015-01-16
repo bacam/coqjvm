@@ -421,6 +421,8 @@ Proof.
     try rewrite count_sum_rzero in *;
     simpl in *;
     auto; try discriminate.
+    (* FIXME: this didn't used to be necessary *)
+    destruct c2; auto.
 Qed.
 
 Add Morphism combine with signature  eq ==>  eq ==>  eq as combine_morphism.

@@ -284,7 +284,7 @@ Program Definition heap_lookup_field (classes:CP.cert_classpool)
 Next Obligation.
 exists cls_nm. exists flds. intuition. left. intuition.
  destruct heap as [heap wth].
- destruct (wth _ _ _ (sym_eq Heq_anonymous)) as [_ wtf].
+ destruct (wth _ _ _ (sym_eq Heq_anonymous0)) as [_ wtf].
  unfold well_typed_fieldstore in wtf. eapply wtf. symmetry. eassumption.
 Defined.
 Next Obligation.
@@ -464,8 +464,8 @@ Program Definition heap_update_field (classes:CP.cert_classpool)
     end.
 Next Obligation.
 elimtype False.
-destruct (PreObjectHeap.update_ok _ _ _ (hp_object cls_nm (FieldStore.update fields (fld_cls,fld_nm,fld_ty) v)) (sym_eq Heq_anonymous)) as [heap' heap'_eq].
-assert (None = Some heap'). rewrite Heq_anonymous0. rewrite <- heap'_eq. reflexivity. discriminate.
+destruct (PreObjectHeap.update_ok _ _ _ (hp_object cls_nm (FieldStore.update fields (fld_cls,fld_nm,fld_ty) v)) (sym_eq Heq_anonymous0)) as [heap' heap'_eq].
+assert (None = Some heap'). rewrite Heq_anonymous. rewrite <- heap'_eq. reflexivity. discriminate.
 Defined.
 Next Obligation.
 destruct heap as [heap wth]. simpl in *.
@@ -474,8 +474,8 @@ assert (preserve:inner_preserve_classes heap heap').
 unfold well_typed_heap. intros a clsnm flds lookup.
 destruct (positive_eq_dec a addr) as [a_eq_addr|a_neq_addr].
  (* addr = a *)
- subst. rewrite (PreObjectHeap.lookup_update _ _ _ _ (sym_eq Heq_anonymous0)) in lookup.
- inversion lookup. subst. clear lookup. destruct (wth _ _ _ (sym_eq Heq_anonymous)). split.
+ subst. rewrite (PreObjectHeap.lookup_update _ _ _ _ (sym_eq Heq_anonymous)) in lookup.
+ inversion lookup. subst. clear lookup. destruct (wth _ _ _ (sym_eq Heq_anonymous0)). split.
   assumption.
   unfold well_typed_fieldstore. intros fld_cls2 fld_nm2 fld_ty2 v2 v2_lookup.
   destruct (FullFieldDesc_eq_dec (fld_cls,fld_nm,fld_ty) (fld_cls2,fld_nm2,fld_ty2)) as [fld_eq_fld2|fld_neq_fld2].
@@ -486,7 +486,7 @@ destruct (positive_eq_dec a addr) as [a_eq_addr|a_neq_addr].
    rewrite FieldStore.indep_lookup in v2_lookup; [|auto].
     eapply inner_preserve_inner_typed_val; eauto.
  (* a <> addr *)
- destruct (wth _ _ _ (PreObjectHeap.indep_lookup_2 (sym_eq Heq_anonymous0) lookup a_neq_addr)). split.
+ destruct (wth _ _ _ (PreObjectHeap.indep_lookup_2 (sym_eq Heq_anonymous) lookup a_neq_addr)). split.
   assumption.
   eapply inner_preserve_well_typed_fieldstore; eauto.
 Defined.
@@ -498,7 +498,7 @@ split.
  (* object_field_value *)
  unfold object_field_value. simpl.
  exists cls_nm. exists (FieldStore.update fields (fld_cls, fld_nm, fld_ty) v). split.
-  eapply PreObjectHeap.lookup_update. symmetry. apply Heq_anonymous0.
+  eapply PreObjectHeap.lookup_update. symmetry. apply Heq_anonymous.
   left. split.
    apply FieldStore.lookup_update.
    eapply inner_preserve_inner_typed_val; eauto.
@@ -513,7 +513,7 @@ split.
    (* addr <> addr' *)
    exists cls_nm'. exists flds. split.
     eapply PreObjectHeap.indep_lookup.
-     symmetry. apply Heq_anonymous0.
+     symmetry. apply Heq_anonymous.
      apply H1.
      apply neq_symm. apply addr_neq_addr'.
     destruct H2 as [[H2 H3]|[H2 H3]].
@@ -525,8 +525,8 @@ split.
    destruct (positive_eq_dec addr addr') as [addr_eq_addr' | addr_neq_addr'].
     (* addr = addr' *)
     subst. exists cls_nm. exists (FieldStore.update fields (fld_cls, fld_nm, fld_ty) v). split.
-     eapply PreObjectHeap.lookup_update. symmetry. apply Heq_anonymous0.
-     rewrite <- Heq_anonymous in H1. inversion H1. subst. 
+     eapply PreObjectHeap.lookup_update. symmetry. apply Heq_anonymous.
+     rewrite <- Heq_anonymous0 in H1. inversion H1. subst. 
      destruct H2 as [[H2 H3]|[H2 H3]].
       left. split.
        rewrite FieldStore.indep_lookup; auto.
@@ -535,7 +535,7 @@ split.
     (* addr <> addr' *)
     exists cls_nm'. exists flds. split.
      eapply PreObjectHeap.indep_lookup.
-      symmetry. apply Heq_anonymous0.
+      symmetry. apply Heq_anonymous.
       apply H1.
       apply neq_symm. apply addr_neq_addr'.
      destruct H2 as [[H2 H3]|[H2 H3]].

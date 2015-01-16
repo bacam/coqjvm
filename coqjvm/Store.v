@@ -215,7 +215,7 @@ intros. rewrite St.fold_1.
 set (s:=St.empty object).
 assert (not_in_s:St.find k s = None).
  destruct (option_dec (St.find k (St.empty object))) as [[o o_exists] | no_o].
-  elimtype False. refine (St.empty_1 _). apply St.find_2. apply o_exists.
+  elimtype False. apply (St.empty_1 (St.find_2 o_exists)).
   assumption.
 generalize s not_in_s. clear s not_in_s. induction (St.elements l); intros.
  (* nil *)
@@ -234,9 +234,7 @@ Save.
 Lemma remove_lookup : forall l k, lookup (remove k l) k = None.
 unfold lookup. unfold remove. intros.
 destruct (option_dec (St.find k (St.remove k l))) as [[o o_exists] | no_o].
- elimtype False. refine (St.remove_1 (elt:=object) _ _).
-  apply Key.eq_refl.
-  exists o. apply St.find_2. eassumption.
+ elimtype False. apply (St.remove_1 (Key.eq_refl k) (ex_intro _ o (St.find_2 o_exists))).
  assumption.
 Save.
 
@@ -364,7 +362,7 @@ Save.
 Lemma lookup_empty : forall k, lookup empty k = None.
 intros. unfold lookup. unfold empty. 
 destruct (option_dec (St.find k (St.empty object))) as [[o o_exists] | no_o].
- elimtype False. refine (St.empty_1 _). eapply St.find_2. apply o_exists.
+ elimtype False. apply (St.empty_1 (St.find_2 o_exists)).
  assumption.
 Save.
 
@@ -598,7 +596,7 @@ induction l1; intros.
      destruct (Key.compare x k2).
       right. apply Key.lt_not_eq. apply l0.
       left. assumption.
-      right. unfold not. intro. refine (Key.lt_not_eq _ _). apply l0. symmetry. apply H3.
+      right. unfold not. intro. apply (Key.lt_not_eq l0). symmetry. apply H3.
     destruct H3.
      right. auto.
      left. elimtype False. apply (sort_not_in ((k1,o1)::l1) o2 k2).
@@ -696,7 +694,7 @@ induction l1; intros.
      destruct (Key.compare x k2).
       right. apply Key.lt_not_eq. apply l0.
       left. assumption.
-      right. unfold not. intro. refine (Key.lt_not_eq _ _). apply l0. symmetry. apply H5.
+      right. unfold not. intro. apply (Key.lt_not_eq l0). symmetry. apply H5.
     destruct H5.
      right. auto.
      left. elimtype False. apply (sort_not_in ((k1,o1)::l1) o2 k2).

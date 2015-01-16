@@ -12,6 +12,9 @@ Require Import Twosig.
 
 Require Import AnnotationIface.
 
+(* TODO: remove *)
+Set Asymmetric Patterns.
+
 Module MkClasspool (B : BASICS) (ANN : ANNOTATION B) (C : CLASSDATATYPES B ANN)
                  : CLASSPOOL B ANN C.
 
