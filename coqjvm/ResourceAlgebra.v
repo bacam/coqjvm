@@ -16,9 +16,9 @@ Parameter res : Type.
 Parameter eq : res -> res -> Prop.
 Notation "e1 [=] e2" := (eq e1 e2) (at level 70, no associativity).
 
-Hypothesis eq_refl : forall r, r [=] r.
-Hypothesis eq_symm : forall r1 r2, r1 [=] r2 -> r2 [=] r1.
-Hypothesis eq_trans : forall r1 r2 r3, r1 [=] r2 -> r2 [=] r3 -> r1 [=] r3.
+Axiom eq_refl : forall r, r [=] r.
+Axiom eq_symm : forall r1 r2, r1 [=] r2 -> r2 [=] r1.
+Axiom eq_trans : forall r1 r2 r3, r1 [=] r2 -> r2 [=] r3 -> r1 [=] r3.
 
 Add Relation res eq
  reflexivity proved by eq_refl
@@ -29,9 +29,9 @@ Add Relation res eq
 Parameter leq : res -> res -> Prop.
 Notation "e1 <: e2" := (leq e1 e2) (at level 75, no associativity).
 
-Hypothesis leq_refl     : forall r1 r2, r1 [=] r2 -> r1 <: r2.
-Hypothesis leq_antisymm : forall r1 r2, r1 <: r2 -> r2 <: r1 -> r1 [=] r2.
-Hypothesis leq_trans    : forall r1 r2 r3, r1 <: r2 -> r2 <: r3 -> r1 <: r3.
+Axiom leq_refl     : forall r1 r2, r1 [=] r2 -> r1 <: r2.
+Axiom leq_antisymm : forall r1 r2, r1 <: r2 -> r2 <: r1 -> r1 [=] r2.
+Axiom leq_trans    : forall r1 r2 r3, r1 <: r2 -> r2 <: r3 -> r1 <: r3.
 
 Declare Instance ra_leq_rel : PreOrder leq.
 Declare Instance leq_morphism : Morphisms.Proper (eq ==> eq ==> iff) leq.
@@ -41,24 +41,24 @@ Notation "e1 :*: e2" := (combine e1 e2) (at level 40, left associativity).
 
 Parameter e : res.
 
-Hypothesis e_bottom : forall r, e <: r.
-Hypothesis e_combine_r : forall r, e :*: r [=] r.
-Hypothesis r_combine_e : forall r, r :*: e [=] r.
-Hypothesis combine_assoc : forall r1 r2 r3, r1 :*: (r2 :*: r3) [=] (r1 :*: r2) :*: r3.
-Hypothesis combine_symm  : forall r1 r2, r1 :*: r2 [=] r2 :*: r1.
+Axiom e_bottom : forall r, e <: r.
+Axiom e_combine_r : forall r, e :*: r [=] r.
+Axiom r_combine_e : forall r, r :*: e [=] r.
+Axiom combine_assoc : forall r1 r2 r3, r1 :*: (r2 :*: r3) [=] (r1 :*: r2) :*: r3.
+Axiom combine_symm  : forall r1 r2, r1 :*: r2 [=] r2 :*: r1.
 
 Declare Instance combine_morphism_Proper : Morphisms.Proper (eq ==> eq ==> eq) combine.
 Declare Instance combine_order_Proper : Morphisms.Proper (leq ++> leq ++> leq) combine.
-Hypothesis combine_order : forall x y, x <: y -> forall x0 y0, x0 <: y0 -> x :*: x0 <: y :*: y0.
+Axiom combine_order : forall x y, x <: y -> forall x0 y0, x0 <: y0 -> x :*: x0 <: y :*: y0.
 
 Parameter bang : res -> res.
 Notation "! e" := (bang e) (at level 35, right associativity).
 
-Hypothesis bang_unit : forall r, r <: !r.
-Hypothesis bang_mult : forall r, !!r <: !r.
-Hypothesis bang_codup : forall r, !r :*: !r <: !r.
-Hypothesis bang_e : !e [=] e.
-Hypothesis bang_combine : forall r1 r2, !(r1 :*: r2) [=] !r1 :*: !r2.
+Axiom bang_unit : forall r, r <: !r.
+Axiom bang_mult : forall r, !!r <: !r.
+Axiom bang_codup : forall r, !r :*: !r <: !r.
+Axiom bang_e : !e [=] e.
+Axiom bang_combine : forall r1 r2, !(r1 :*: r2) [=] !r1 :*: !r2.
 
 Parameter r_new : RA_B.Classname.t -> option res.
 

@@ -9,6 +9,7 @@ Require Import BoolExt.
 Require Import ILLInterfaces.
 Require Import ResourceAlgebra.
 Require Import Arith.
+Require Import Omega.
 
 Require Import BasicMachineTypes.
 
@@ -207,7 +208,7 @@ destruct l; intros.
 Save.
 
 Lemma elements_empty : VarSet.elements VarSet.empty = nil.
-apply list_empty. intros. unfold not. intro. refine (VarSet.empty_1 _). apply VarSet.elements_2. apply H.
+apply list_empty. intros. unfold not. intro. apply (VarSet.empty_1 (VarSet.elements_2 H)).
 Save. 
 
 Lemma shift_varset_empty : forall d c,
@@ -1048,7 +1049,7 @@ Proof.
 Definition proof_check_single (A B:formula) (t:prf_term)
   : { implies A B }+{True}
   := match proof_check nil (A::nil) t with
-     | inleft (exist B' H) =>
+     | inleft (exist _ B' H) =>
         match formula_eq_dec B' B with
         | left B'_eq_B =>
            left _ (ex_intro _ t (eq_ind _ _ H _ B'_eq_B))
@@ -1224,7 +1225,6 @@ intros. destruct n.
  right. exists n. reflexivity.
 Save.
 
-Require Omega.
 
 Lemma not_in_mem_false : forall n s,
   ~ (VarSet.In n s) -> VarSet.mem n s = false.

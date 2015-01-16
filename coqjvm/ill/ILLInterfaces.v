@@ -138,13 +138,13 @@ Parameter proof_check : forall Gi G (t:prf_term),
 Definition implies : formula -> formula -> Prop :=
   fun A B => exists t, exists U, prf nil (A::nil) t B U.
 
-Hypothesis implies_refl : forall A, implies A A.
-Hypothesis implies_trans : forall A B C, implies A B -> implies B C -> implies A C.
-Hypothesis implies_subformulae : forall f1 f2 f1' f2' fo,
+Axiom implies_refl : forall A, implies A A.
+Axiom implies_trans : forall A B C, implies A B -> implies B C -> implies A C.
+Axiom implies_subformulae : forall f1 f2 f1' f2' fo,
   implies f1 f1' -> implies f2 f2' -> fo = f_tensor \/ fo = f_and ->
   implies (fo f1 f2) (fo f1' f2').
 (*
-Hypothesis implies_lolli : forall f1 f2 f1' f2',
+Axiom implies_lolli : forall f1 f2 f1' f2',
   implies f1 f1' -> implies f2 f2' ->
   implies (f_lolli f1' f2) (f_lolli f1 f2').
 *)
@@ -154,11 +154,11 @@ Parameter proof_check_single : forall A B (t:prf_term),
   { implies A B }+{True}.
 
 
-Hypothesis prf_uses_ctx : forall Gi G t A U,
+Axiom prf_uses_ctx : forall Gi G t A U,
  prf Gi G t A U -> forall n, VarSet.In n U -> n < length G.
 (* There's a stronger version of this in the implementation, but it requires
    more work to use. *)
-Hypothesis proof_weakening : forall Gi G G' t A U,
+Axiom proof_weakening : forall Gi G G' t A U,
  prf Gi G t A U -> prf Gi (G++G') t A U.
 
 Definition r_may := fun c f =>
@@ -183,8 +183,8 @@ Declare Module SYN : ILL_BASE_SYNTAX B.
 
 Parameter res_of_atom : SYN.atom -> RA.res.
 
-Hypothesis r_new_match : forall cls_nm r, RA.r_new cls_nm = Some r -> exists a, SYN.R_new cls_nm = Some a /\ res_of_atom a = r.
-Hypothesis r_new_empty : forall cls_nm  , RA.r_new cls_nm = None -> SYN.R_new cls_nm = None.
+Axiom r_new_match : forall cls_nm r, RA.r_new cls_nm = Some r -> exists a, SYN.R_new cls_nm = Some a /\ res_of_atom a = r.
+Axiom r_new_empty : forall cls_nm  , RA.r_new cls_nm = None -> SYN.R_new cls_nm = None.
 
 Fixpoint sat (r:RA.res) (A:SYN.formula) {struct A} : Prop
  :=
@@ -197,7 +197,7 @@ Fixpoint sat (r:RA.res) (A:SYN.formula) {struct A} : Prop
  | SYN.f_bang A     => exists r', RA.leq (RA.bang r') r /\ sat r' A
  end.
 
-Hypothesis axioms_sound : forall ax r,
+Axiom axioms_sound : forall ax r,
   sat r (SYN.axiom_domain ax) -> sat r (SYN.axiom_codomain ax).
 
 End ILL_BASE_SEMANTICS.
@@ -225,26 +225,26 @@ Fixpoint icontext_to_formula (G:context) : SYN.formula :=
   | cons f rest => SYN.f_tensor f (icontext_to_formula rest)
   end.
 
-Hypothesis soundness : forall r Gi G t A U,
+Axiom soundness : forall r Gi G t A U,
   prf Gi G t A U ->
   sat r (SYN.f_tensor (SYN.f_bang (icontext_to_formula Gi)) (context_to_formula G 0 U)) ->
   sat r A.
 
-Hypothesis single_soundness : forall r A B t U,
+Axiom single_soundness : forall r A B t U,
   sat r A ->
   prf nil (A::nil) t B U ->
   sat r B.
 
-Hypothesis implies_soundness : forall r A B,
+Axiom implies_soundness : forall r A B,
   sat r A ->
   implies A B ->
   sat r B.
 
-Hypothesis sat_leq : forall r1 r2 A,
+Axiom sat_leq : forall r1 r2 A,
   sat r1 A -> RA.leq r1 r2 -> sat r2 A.
 
 
-Hypothesis res_formula : forall re:res_expr B.Classname.t,
+Axiom res_formula : forall re:res_expr B.Classname.t,
   sat (RA.res_parse re) (resexpr_to_formula re).
 
 End ILL_SEMANTICS.

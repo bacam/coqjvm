@@ -3,6 +3,7 @@ Require Import ILLSimplifierIface.
 Require Import List.
 Require Import FSetProperties.
 Require Setoid.
+Require Import Omega.
 
 Require Import BasicMachineTypes.
 

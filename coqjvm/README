@@ -10,10 +10,10 @@ implementations. In an attempt to make the execution run at a
 reasonable speed, details of the underlying machine such as integers
 and machine addresses are abstracted via functors. 
 
-To compile you will need Coq 8.2, a reasonably recent version of
-ocaml (3.10.1 works) and ocamldsort.
+To compile you will need Coq 8.5, a reasonably recent version of
+ocaml (4.02.1 works) and ocamldsort.
 
-With Coq 8.2 on your path just type 'make'. This will, eventually,
+With Coq 8.5 on your path just type 'make'. This will, eventually,
 produce an executable called 'coqjvm'. Type './coqjvm' to get usage
 information. By default it tries to load classes from the current
 directory. Some examples are included. Try:
