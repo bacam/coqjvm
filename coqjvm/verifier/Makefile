@@ -78,7 +78,7 @@ recclean: clean
 	$(MAKE) -C .. $*.vo
 
 %.vo: %.v
-	coqc -I .. $(COQ_DIR_OPT) $*
+	coqc -Q .. "" $(COQ_DIR_OPT) $*
 
 deps-coq: *.v
 	coqdep -I .. $(COQ_DIR_OPT) $^ | sed -e 's/^Extraction.vo/coqextract.cmo coqextract.cmi/' > $@

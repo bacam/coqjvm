@@ -483,12 +483,13 @@ Program Definition scan_interface_aux
   (pi : C.preclass | CP.Preclasspool.lookup preclasses iface = Some pi)
   : error_monad {vcs:vcset | interfaces_checked specs iface vcs} :=
   match CP.class_loaded_dec classes iface with
-    | inleft (exist c _) =>
+    | inleft (exist _ c _) =>
       if C.class_interface c then
         vcs1 <- check_vc (check_interface_method clsnm class_annot specs) (C.MethodList.elements (C.class_methods c)) vcset_empty;::
                 (* Program doesn't produce an equality unless we expand f a bit *)
-        vcs2 <- check_vc (fun x => r <- f x;: ret r) (C.class_interfaces c) vcset_empty;::
-        ret (vcset_union vcs1 vcs2)
+(*        vcs2 <- check_vc (fun x => r <- f x;: ret r) (C.class_interfaces c) vcset_empty;::*)
+        vcs2 <- check_vc (fun x => r <- f x;: ret (r :>)) (C.class_interfaces c) vcset_empty;::
+        ret (vcset_union vcs1 vcs2 : {vcs:vcset | interfaces_checked specs iface vcs })
 
       else
         fail (err_class_should_be_interface mlapp err_sep mlapp (B.Classname.to_string iface))
@@ -496,16 +497,16 @@ Program Definition scan_interface_aux
       if C.preclass_interface pi then
         vcs1 <- check_vc (check_interface_premethod clsnm class_annot specs) (C.preclass_methods pi) vcset_empty;::
                 (* Program doesn't produce an equality unless we expand f a bit *)
-        vcs2 <- check_vc (fun x => r <- f x;: ret r) (C.preclass_super_interfaces pi) vcset_empty;::
-        ret (vcset_union vcs1 vcs2)
+        vcs2 <- check_vc (fun x => r <- f x;: ret (r :>)) (C.preclass_super_interfaces pi) vcset_empty;::
+        ret (vcset_union vcs1 vcs2 : {vcs:vcset | interfaces_checked specs iface vcs })
       else
         fail (err_class_should_be_interface mlapp err_sep mlapp (B.Classname.to_string iface))
   end.
 Next Obligation.
   rename wildcard' into loaded.
-  clear Heq_anonymous.
-  rename Heq_anonymous0 into methods_ok. symmetry in methods_ok.
-  rename Heq_anonymous1 into super_ifaces_ok. symmetry in super_ifaces_ok.
+  clear Heq_anonymous0.
+  rename Heq_anonymous1 into methods_ok. symmetry in methods_ok.
+  rename Heq_anonymous into super_ifaces_ok. symmetry in super_ifaces_ok.
 
   intros mth m_annot iface_req vcs_ok.
   inversion iface_req; subst.
@@ -528,9 +529,9 @@ Qed.
 Next Obligation.
   rename wildcard' into not_loaded.
   rename H into pi_exists.
-  clear Heq_anonymous.
-  rename Heq_anonymous0 into methods_ok. symmetry in methods_ok.
-  rename Heq_anonymous1 into super_ifaces_ok. symmetry in super_ifaces_ok.
+  clear Heq_anonymous0.
+  rename Heq_anonymous1 into methods_ok. symmetry in methods_ok.
+  rename Heq_anonymous into super_ifaces_ok. symmetry in super_ifaces_ok.
 
   intros mth m_annot iface_req vcs_ok.
   inversion iface_req; subst.
@@ -710,7 +711,7 @@ constructor; intros.
  assert (A.assignable classes (C.ty_obj nmS) (C.ty_obj nmS0)) by (eapply PA.cross_assignable_undo_step_2; eauto; apply nm_exists).
  destruct H as [H|H].
   (* in spec_table_current *)
-  set (H_copy := H). revert H_copy. intro H_copy.
+  set (H_copy := H). clearbody H_copy.
   rewrite all_exist in H. 
   destruct H as [neq_init [m' [has_m' [m'_static m'_mspec]]]].
   destruct (cspecs_exist_2 _ _ spec_table_super_correct md).
@@ -964,7 +965,7 @@ Program Definition check_preclass_aux
     : error_monad ({vcs : vcset & {specs:SpecTable.t GA.method_specification | vcset_ok vcs -> checked_class nm specs}}) :=
     (tagfailure ((B.Classname.to_string nm) mlapp err_sep)
       (match CP.class_loaded_dec classes nm with
-         | inleft (exist c _) =>
+         | inleft (exist _ c _) =>
            match C.class_interface c with
              | true => fail err_class_should_not_be_interface
              | false =>
@@ -975,7 +976,7 @@ Program Definition check_preclass_aux
            match C.preclass_interface pc with true => fail err_class_should_not_be_interface | false => ret tt end;;;
            nmS <- tagoptfail err_preclass_should_have_superclass (C.preclass_super_name pc);::
            spec_table_super_vcs1 <- f nmS;::
-           match spec_table_super_vcs1 with (existT vcs1 (exist spec_table_super _)) =>
+           match spec_table_super_vcs1 with (existT _ vcs1 (exist _ spec_table_super _)) =>
              spec_table_current_vcs2 <- scan_methods nm (C.preclass_annotation pc) (C.preclass_methods pc) nil spec_table_super (SpecTable.empty _) vcset_empty;::
              match spec_table_current_vcs2 with (spec_table_current, vcs2) =>
                let spec_table_new := STOverlay.overlay _ spec_table_current spec_table_super in
@@ -987,19 +988,20 @@ Program Definition check_preclass_aux
 Next Obligation.
  (* nm is in classes *)
  left. exists c. 
-  symmetry in Heq_anonymous0. destruct (classes_spec_table_correct _ _ wildcard' Heq_anonymous0) as [specs' [specs'_lookup specs'_correct]].
-  assert (specs' = specs). rewrite (ClassTable.find_1 specs'_lookup) in Heq_anonymous1. simpl in Heq_anonymous1. congruence.
+  symmetry in Heq_anonymous1. destruct (classes_spec_table_correct _ _ wildcard' Heq_anonymous1) as [specs' [specs'_lookup specs'_correct]].
+  assert (specs' = specs). rewrite (ClassTable.find_1 specs'_lookup) in Heq_anonymous. simpl in Heq_anonymous. congruence.
   subst. intuition.
 Qed.
 Next Obligation.
  (* nm is not in classes *)
  (* clean up context. *)
- destruct wildcard'0. (* unit *)
- rename wildcard' into no_nm_class. clear Heq_anonymous.
- destruct (BoolExt.bool_dec (C.preclass_interface pc)) as [pc_interface|pc_interface]; [rewrite pc_interface in Heq_anonymous0; discriminate|clear Heq_anonymous0].
- clear Heq_anonymous2.
+ destruct wildcard'1. (* unit *)
+ rename wildcard'0 into no_nm_class. clear Heq_anonymous0.
+ simpl in Heq_anonymous1.
+ destruct (BoolExt.bool_dec (C.preclass_interface pc)) as [pc_interface|pc_interface]; [rewrite pc_interface in Heq_anonymous1; discriminate|clear Heq_anonymous1].
+(* clear Heq_anonymous2.*)
  rename Heq_anonymous3 into methods_checked.
- rename Heq_anonymous4 into interfaces_implemented.
+ rename Heq_anonymous into interfaces_implemented.
  rename H0 into pc_exists.
 (* inversion Heq_spec_table_current_vcs2. subst t v.*)
  rename H into vcs_ok.
@@ -1013,8 +1015,8 @@ Next Obligation.
  assert (nm_not_loaded:forall c, ~CP.class_loaded classes nm c) by (unfold not; intros; apply no_nm_class; exists c; assumption).
  (* but it is in the preclasses *)
  right. exists pc.
- destruct (OptionExt.option_dec (C.preclass_super_name pc)) as [[super_name super_name_res]|super_name_res]; rewrite super_name_res in Heq_anonymous1; try discriminate.
- simpl in Heq_anonymous1. injection Heq_anonymous1. intro.  subst super_name. clear Heq_anonymous1.
+ destruct (OptionExt.option_dec (C.preclass_super_name pc)) as [[super_name super_name_res]|super_name_res]; rewrite super_name_res in Heq_anonymous2; try discriminate.
+ simpl in Heq_anonymous2. injection Heq_anonymous2. intro.  subst super_name. clear Heq_anonymous2.
 
  assert (every (premethod_safe_override spec_table_super) (C.preclass_methods pc)). eapply scan_methods_ok. symmetry. eassumption. eapply vcset_union_ok1. eapply vcset_union_ok2. eassumption.
  assert (forall mdesc spec, SpecTable.MapsTo mdesc spec spec_table_current  <-> fst mdesc <> B.init /\ exists m, C.has_premethod (C.preclass_methods pc) mdesc m /\ C.premethod_static m = false /\ premethod_spec m = spec).
@@ -1162,7 +1164,7 @@ Definition check_preclass (k:B.Classname.t) : error_monad (vcset * SpecTable.t G
         | false =>
           r <- check_preclass' k;:
           match r with
-            | (existT vcs (exist specs _)) => ret (vcs, specs)
+            | (existT _ vcs (exist _ specs _)) => ret (vcs, specs)
           end
       end
   end.

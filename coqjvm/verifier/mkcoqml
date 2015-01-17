@@ -5,7 +5,7 @@ set -ex
 test '!' -d coqextraction || rm -r coqextraction
 mkdir coqextraction
 cd coqextraction
-coqtop -batch -I ../.. -R ../../ill ILL -R .. Verifier -lv Extraction.v
+coqtop -batch -Q ../.. "" -R ../../ill ILL -R .. Verifier -lv Extraction.v
 echo "MLfiles=" `ocamldsort *.ml` > make
 cat <<EOF >> make
 CMOfiles=\$(MLfiles:.ml=.cmo)

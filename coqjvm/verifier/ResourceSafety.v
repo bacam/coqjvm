@@ -18,6 +18,7 @@ Require Import VirtualMethodLookupIface.
 Require Import ResolutionIface.
 Require Import VerifierAnnotationsIface.
 Require Import Setoid.
+Require Import Omega.
 Require BuiltinClasses.
 
 Require Import AbstractLogic.
@@ -293,7 +294,7 @@ eapply preserve_preclass_verified.
   eapply H.
    apply H2.
    assumption.
-   unfold not. intros. refine (H4 _ _). apply H0. eassumption.
+   unfold not. intros. eapply H4. apply H0. eassumption.
   assumption.
   assumption.
 Save.
@@ -700,7 +701,7 @@ Proof.
  unfold E.update_reslimit in EXEC.
  case_eq (ANN.GA.A.grants (C.method_annot method)).
   intros g geq. rewrite geq in EXEC.
-  case_eq (E.ClassnameSet.mem (C.class_name class) privclasses).
+  case_eq (CLSNM.mem (C.class_name class) privclasses).
    intro priveq. rewrite priveq in EXEC.
    exists (res_parse g).
    repeat split.
@@ -711,7 +712,7 @@ Proof.
      rewrite grants in geq. discriminate. 
     rewrite <- EXEC. apply leq_refl. reflexivity.
    intro bad. destruct verified as [[_ [_ [priv _]]]|[nogrants _]].
-    apply E.ClassnameSet.mem_1 in priv. rewrite priv in bad. discriminate.
+    apply CLSNM.mem_1 in priv. rewrite priv in bad. discriminate.
     change ANN.grants with ANN.GA.A.grants in nogrants.
     rewrite nogrants in geq. discriminate.
    intros geq. rewrite geq in EXEC. exists e. repeat split.
@@ -879,7 +880,7 @@ destruct stk; try (right; right; right; assumption).
 destruct r; try (right; right; right; assumption).
 rewrite H1 in EXEC.
 
-assert (exists classes', exists p : CP.preserve_old_classes classes classes', exists o, exists c, exists H, E.R.resolve_class (C.class_name class) clsnm classes preclasses = CP.load_ok _ p o c H).
+assert (exists classes', exists p : CP.preserve_old_classes classes classes', exists o, exists c, exists H, R.resolve_class (C.class_name class) clsnm classes preclasses = CP.load_ok _ p o c H).
  destruct H2.
   destruct (cpa_classref _ _ _ _ _ cpa_ok idx clsnm H1 H) as [classes' [p [oa [c [c_exists resolve_ok]]]]]. intuition eauto 6.
   destruct (cpa_ins_class _ _ _ _ _ cpa_ok idx clsnm H1 H) as [classes' [p [oa [c [c_exists [resolve_ok _]]]]]]. intuition eauto 6.
@@ -1080,7 +1081,6 @@ rewrite H1 in EXEC.
 
 destruct (cpa_instance_special_method _ _ _ _ _ cpa_ok _ _ _ _ _ _ _ H1 H2)
       as [classes' [p [oa [c [m [[X1 [X2 X3]] [resolve_ok [not_abstract [not_static [has_spec not_interface]]]]]]]]]].
-change R.resolve_method with E.R.resolve_method in resolve_ok.
 
 rewrite resolve_ok in EXEC.
 destruct (E.pop_n (length (C.descriptor_arg_types md)) stk) as [[args op_stack] | ]; try (right; right; right; assumption).
@@ -1440,7 +1440,7 @@ destruct stk; try (right; right; right; assumption).
 destruct r; try (right; right; right; assumption).
 rewrite H1 in EXEC.
 
-assert (exists classes', exists p : CP.preserve_old_classes classes classes', exists o, exists c, exists H, E.R.resolve_class (C.class_name class) clsnm classes preclasses = CP.load_ok _ p o c H).
+assert (exists classes', exists p : CP.preserve_old_classes classes classes', exists o, exists c, exists H, R.resolve_class (C.class_name class) clsnm classes preclasses = CP.load_ok _ p o c H).
  destruct H2.
   destruct (cpa_classref _ _ _ _ _ cpa_ok idx clsnm H1 H) as [classes' [p [oa [c [c_exists resolve_ok]]]]]. intuition eauto 6.
   destruct (cpa_ins_class _ _ _ _ _ cpa_ok idx clsnm H1 H) as [classes' [p [oa [c [c_exists [resolve_ok _]]]]]]. intuition eauto 6.
@@ -1528,7 +1528,7 @@ assert (all_classes_v':all_classes_verified preclasses privclasses classes'). ea
 rewrite resolve_ok in EXEC.
 destruct (BoolExt.bool_informative (C.field_static f)).
  (* field is static *)
- match goal with _:(match ?x with exist _ _ => _ end) = _ |- _ => destruct x end.
+ match goal with _:(match ?x with exist _ _ _ => _ end) = _ |- _ => destruct x end.
  left. eapply ex_intro. repeat split.
   eassumption.
   eapply mk_safe_state; eauto.
@@ -1555,7 +1555,7 @@ destruct (BoolExt.bool_informative (C.class_interface c)).
  (* but it is an interface: impossible *)
  rewrite not_interface in e0. discriminate.
  (* actually create the object *)
- match goal with _:match ?x with Twosig.pack2 _ _ _ => _ end = _ |- _ =>
+ match goal with _:match ?x with Twosig.pack2 _ _ _ _ => _ end = _ |- _ =>
     destruct x as [heap0 addr [X1 [X2 [X3 [preserved X4]]]]] end.
  left. eapply ex_intro. repeat split.
   eassumption.
@@ -1644,7 +1644,7 @@ rewrite resolve_ok in EXEC.
 destruct (BoolExt.bool_informative (C.field_static f)).
  (* field is static *)
  match goal with _:match ?x with left _ => _ | right _ => _ end = _ |- _ => destruct x end; try (right; right; right; assumption).
- match goal with _:(match ?x with exist _ _ => _ end) = _ |- _ => destruct x end.
+ match goal with _:(match ?x with exist _ _ _ => _ end) = _ |- _ => destruct x end.
  left. eapply ex_intro. repeat split.
   eassumption.
   eapply mk_safe_state; eauto.

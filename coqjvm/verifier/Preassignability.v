@@ -385,7 +385,6 @@ Proof.
   rewrite super in super';
   injection super' as nmeq;
   subst nm2;
-  clear lookup' super'.
     case_eq (C.class_interface c); intro int.
       destruct subclass' as [nmS c' loaded|nmS' nmS nmM c' loaded super' subclass'].
         apply A.assignable_interface_interface_refl with (cS:=c); auto.
@@ -418,6 +417,7 @@ Proof.
         destruct (top_is_nice _ _ _ _ subclass' loadedS' int) as [clS [loadedS notintS]].
         apply A.assignable_class_class with (cS:=c) (cT:=clS); auto.
 
+    inversion subclass'; destruct (H0 c loadedS').
     inversion subclass'; destruct (H0 c loadedS').
 Qed.
 
@@ -672,7 +672,7 @@ Proof.
             apply (H1 pm premethod).
 
             rewrite (CP.class_loaded_unique H4 loaded') in *. clear H4.
-            rewrite H2 in H13.  injection H13 as s_nm_eq.  clear H13. subst s_nm.
+            rewrite H2 in H13.  injection H13 as s_nm_eq. subst s_nm.
             unfold VM.lookup_minimal in H7. eapply H7; eauto.
               apply A.assignable_class_class with (cS:=cS) (cT:=cB'); auto.
               apply H8. apply H9. apply H10. apply H11. apply H12.
