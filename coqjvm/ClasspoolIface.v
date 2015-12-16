@@ -85,7 +85,7 @@ Inductive super_class_chain (classes:cert_classpool) : option CP_B.Classname.t -
      super_class_chain classes (CP_C.class_super_class c')) ->
    super_class_chain classes (Some nm).
 
-Polymorphic Axiom super_class_chain_induction
+Axiom super_class_chain_induction
      : forall (classes : cert_classpool)
          (P : forall o : option CP_B.Classname.t,
               super_class_chain classes o -> Prop),
@@ -178,7 +178,7 @@ Inductive good_interface_list2 : cert_classpool -> list CP_B.Classname.t -> Prop
    good_interface_list2 classes rest ->
    good_interface_list2 classes (i_nm::rest).
 
-Polymorphic Axiom good_interface_list2_induction :
+Axiom good_interface_list2_induction :
   forall
     P : forall (c : cert_classpool) (l : list CP_B.Classname.t),
       good_interface_list2 c l -> Prop,

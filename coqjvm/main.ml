@@ -8,7 +8,7 @@ open OptParse
 let rt_val_to_string v = 
   match v with
     | RDT.Coq_rt_int i -> Printf.sprintf "%ld" i
-    | RDT.Coq_rt_addr (Some a) -> Printf.sprintf "a(%d)" (Common.Types.int_of_nat (Coqextract.BinPos.nat_of_P a))
+    | RDT.Coq_rt_addr (Some a) -> Printf.sprintf "a(%d)" (Common.Types.int_of_nat (Coqextract.BinPos.Pos.to_nat a))
     | RDT.Coq_rt_addr None -> Printf.sprintf "a(null)"
     | RDT.Coq_rt_long -> Printf.sprintf "l"
     | RDT.Coq_rt_double -> Printf.sprintf "d"

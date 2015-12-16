@@ -10,7 +10,7 @@ Module Type CERTIFICATE.
 
 Parameter asn : Set.
 
-Declare Module Cert : STORE with Definition key := nat with Module Key := Nat_as_OT with Definition object := asn.
+Declare Module Cert : STORE with Definition key := nat with Definition Key.eq := @eq nat with Definition object := asn.
 
 Parameter cert_incl : Cert.t -> Cert.t -> Prop.
 
