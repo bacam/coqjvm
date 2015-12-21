@@ -6,10 +6,10 @@ This repository contains:
   - an OCaml library for dealing with JVM classfiles; and
   - a slightly modified copy of extlib 1.5 (see below).
 
-At the time of writing, I was able to build it with OCaml 4.02.1 and a
-prerelease version of Coq 8.5, except for the extracted OCaml code which is
-suffering from https://coq.inria.fr/bugs/show_bug.cgi?id=3923.  (Although the
-standalone ILL proof checker works.)
+At the time of writing, I was able to build it with OCaml 4.02.1 and
+Coq 8.5rc1.  To build it you must first install ocamldsort, then run `make` in
+the `extlib-1.5` directory, followed by the `ocaml-jvml-bob` directory.
+The main development can then be built by `make all`.
 
 The copy of extlib-1.5 has been modified.  In particular (from the original svn
 logs):
