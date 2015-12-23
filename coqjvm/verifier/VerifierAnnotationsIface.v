@@ -50,7 +50,6 @@ Definition trivial_method_annotation := Build_method_annotation'
 
 Module GA <: GENERIC_ANNOTATION VA_B.
   Module A <: ANNOTATION VA_B.
-    Module ANN_B := VA_B.
 
     Definition code_annotation := VA_CERT.Cert.t.
     Definition method_annotation := method_annotation'.

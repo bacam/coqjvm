@@ -8,6 +8,9 @@ Require Import AssignabilityIface.
 
 Require Import AnnotationIface.
 
+(* TODO: remove *)
+Set Asymmetric Patterns.
+
 Module MkAssignability (B : BASICS)
                        (ANN : ANNOTATION B)
                        (C : CLASSDATATYPES B ANN)
@@ -1130,13 +1133,13 @@ Proof.
     subst nm'.
     destruct H3.
       rewrite (CP.class_loaded_unique e H0) in *.
-      clear H3.
+      clear H1.
       eapply (H c0 H0); eauto.
       eapply sub_class_refl; eauto.
 
       eapply H; eauto.
       apply CP.class_super_interface with (classes:=classes) (nm1:=nm_t) (nm2:=nm) (c1:=c0) (c2:=c1); auto.
-      eapply sub_class_trans. apply H5. eapply sub_class_step; eauto. eapply sub_class_refl; eauto.
+      eapply sub_class_trans. apply H4. eapply sub_class_step; eauto. eapply sub_class_refl; eauto.
 Qed.
 
 End MkAssignability.

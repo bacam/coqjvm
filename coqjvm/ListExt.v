@@ -1,6 +1,6 @@
 Require Import List.
 Require Import Arith.
-Require Omega.
+Require Import Omega.
 Require Import OptionExt.
 
 Lemma list_dec : forall A (l:list A), (exists h, exists t, l = h::t) \/ l = nil.

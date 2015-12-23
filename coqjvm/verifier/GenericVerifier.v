@@ -16,6 +16,7 @@ Require Import ErrorMessages.
 Require Import MLStrings.
 Require Import NativeMethodSpec.
 Require Import Setoid.
+Require Import Omega.
 
 Module Type CODE_VERIFIER_BASE
   (B : BASICS)
@@ -532,6 +533,7 @@ Proof.
   unfold preclass_verified_methods.
   intros.
   set (init_vcs := VCs.VerificationConditions.empty VCs.vc_sources) in *.
+  clearbody init_vcs.
   revert init_vcs exec.
   induction (C.preclass_methods pcl); intros.
     inversion H.
@@ -558,6 +560,7 @@ Proof.
             (* Establish that adding to the vcs now will ensure that the vc is in
                the final result. *)
             assert (have_vc : VCs.VerificationConditions.In (VCs.simplify_vc (f,f')) suff_vcs) by apply (add_vcs_ok _ _ _ _ _ _ _ _ (refl_equal suff_vcs) H1).
+            clearbody suff_vcs.
             revert suff_vcs have_vc exec.
             induction l; intros.
               simpl in exec.

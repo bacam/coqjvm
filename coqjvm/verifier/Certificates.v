@@ -4,24 +4,25 @@ Require Import Store.
 Require Import OrderedTypeEx.
 Require Import Peano_dec.
 Require Import Compare_dec.
+Require Import Omega.
 
 Module Type CERTIFICATE.
 
 Parameter asn : Set.
 
-Declare Module Cert : STORE with Definition key := nat with Module Key := Nat_as_OT with Definition object := asn.
+Declare Module Cert : STORE with Definition key := nat with Definition Key.eq := @eq nat with Definition object := asn.
 
 Parameter cert_incl : Cert.t -> Cert.t -> Prop.
 
-Hypothesis cert_incl_refl : forall c, cert_incl c c.
-Hypothesis cert_incl_trans : forall c1 c2 c3, cert_incl c1 c2 -> cert_incl c2 c3 -> cert_incl c1 c3.
-Hypothesis cert_incl_update : forall c n a, Cert.lookup c n = None -> cert_incl c (Cert.update c n a).
-Hypothesis cert_incl_lookup : forall c1 c2 n a, Cert.lookup c1 n = Some a -> cert_incl c1 c2 -> Cert.lookup c2 n = Some a.
+Axiom cert_incl_refl : forall c, cert_incl c c.
+Axiom cert_incl_trans : forall c1 c2 c3, cert_incl c1 c2 -> cert_incl c2 c3 -> cert_incl c1 c3.
+Axiom cert_incl_update : forall c n a, Cert.lookup c n = None -> cert_incl c (Cert.update c n a).
+Axiom cert_incl_lookup : forall c1 c2 n a, Cert.lookup c1 n = Some a -> cert_incl c1 c2 -> Cert.lookup c2 n = Some a.
 
 Parameter clean_cert : Cert.t -> nat -> Cert.t.
 
-Hypothesis clean_ok : forall cert limit n, n >= limit -> Cert.lookup (clean_cert cert limit) n = None.
-Hypothesis clean_contra : forall c limit,
+Axiom clean_ok : forall cert limit n, n >= limit -> Cert.lookup (clean_cert cert limit) n = None.
+Axiom clean_contra : forall c limit,
   (forall n, n >= limit -> Cert.lookup c n = None) ->
   (forall n x, Cert.lookup c n = Some x -> n < limit).
 

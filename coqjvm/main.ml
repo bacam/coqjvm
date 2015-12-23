@@ -8,7 +8,7 @@ open OptParse
 let rt_val_to_string v = 
   match v with
     | RDT.Coq_rt_int i -> Printf.sprintf "%ld" i
-    | RDT.Coq_rt_addr (Some a) -> Printf.sprintf "a(%d)" (Common.Types.int_of_nat (Coqextract.BinPos.nat_of_P a))
+    | RDT.Coq_rt_addr (Some a) -> Printf.sprintf "a(%d)" (Common.Types.int_of_nat (Coqextract.BinPos.Pos.to_nat a))
     | RDT.Coq_rt_addr None -> Printf.sprintf "a(null)"
     | RDT.Coq_rt_long -> Printf.sprintf "l"
     | RDT.Coq_rt_double -> Printf.sprintf "d"
@@ -40,7 +40,7 @@ let print_state state =
 (* Repeating the execution steps of the JVM *)
 let rec execstar preclasspool state =
   print_state state;
-  match E.exec preclasspool E.ClassnameSet.empty state with
+  match E.exec preclasspool ClassnameSet.empty state with
     | JVM.Coq_cont state' -> execstar preclasspool state'
     | x -> x
 
@@ -141,8 +141,8 @@ let _ =
 		   ; RDT.state_static_fields=RDT.empty_fieldstore classes (RDT.empty_heap classes)
 		   ; RDT.state_object_heap=RDT.empty_heap classes
 		   ; RDT.state_classes=classes
-		   ; RDT.state_res=E.RA.e
-		   ; RDT.state_reslimit=E.RA.e
+		   ; RDT.state_res=RA.e
+		   ; RDT.state_reslimit=RA.e
 		   }
   in
   let args = List.map (fun i -> RDT.Coq_rt_int i) args in

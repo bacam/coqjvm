@@ -3,6 +3,7 @@ Require OrderedType.
 Require FMapInterface.
 Require BoolExt.
 Require Import Setoid.
+Require Sorted.
 
 Module MakeOverlay (M : FMapInterface.S).
 
@@ -61,17 +62,17 @@ split. apply M.elements_1. apply M.elements_2.
 Save.
 
 Lemma lt_lelist : forall l k k',
-  Sorting.lelistA (M.lt_key (elt:=A)) k l ->
+  Sorted.lelistA (M.lt_key (elt:=A)) k l ->
   M.lt_key k' k ->
-  Sorting.lelistA (M.lt_key (elt:=A)) k' l.
+  Sorted.lelistA (M.lt_key (elt:=A)) k' l.
 intros. inversion H.
  constructor.
  constructor. destruct k. destruct b. destruct k'. unfold M.lt_key in *. simpl in *. eauto using M.E.lt_trans.
 Save.
 
 Lemma in_sorted_contr : forall key elt1 elt2 l,
- Sorting.sort (@M.lt_key A) l ->
- Sorting.lelistA (@M.lt_key A) (key,elt2) l ->
+ Sorted.sort (@M.lt_key A) l ->
+ Sorted.lelistA (@M.lt_key A) (key,elt2) l ->
  SetoidList.InA (@M.eq_key_elt A) (key,elt1) l -> False.
 intros key elt1 elt2. 
 induction l as [|[key' elt'] l]; intros.
@@ -97,7 +98,7 @@ Save.
 
 Lemma elements_functional : forall l x y e e',
  M.E.eq x y ->
- Sorting.sort (@M.lt_key A) l ->
+ Sorted.sort (@M.lt_key A) l ->
  SetoidList.InA (@M.eq_key_elt A) (x,e) l ->
  SetoidList.InA (@M.eq_key_elt A) (y,e') l ->
  e = e'.
@@ -124,7 +125,7 @@ intros md sp specs' specs.
 unfold overlay. rewrite M.fold_1.
 setoid_replace (M.MapsTo md sp specs) with (SetoidList.InA (M.eq_key_elt (elt:=A)) (md,sp) (M.elements specs)).
 set (l:=M.elements specs).
-assert (X:Sorting.sort (@M.lt_key A) l). unfold l. apply M.elements_3. 
+assert (X:Sorted.sort (@M.lt_key A) l). unfold l. apply M.elements_3. 
 generalize l specs' X. clear specs' l X. induction l as [|[key elt] l]; intros; simpl in *.
  destruct H as [in_specs' | [_ in_nil]]. assumption. inversion in_nil.
  apply IHl.

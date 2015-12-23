@@ -88,7 +88,7 @@ veryclean: recclean
 	javac $<
 
 deps-coq: *.v
-	coqdep -I .  $^ | sed -e 's/^Extraction.vo/coqextract.cmo coqextract.cmi/' > $@
+	coqdep -Q . ""  $^ | sed -e 's/^Extraction.vo/coqextract.cmo coqextract.cmi/' > $@
 
 deps-ml: $(ML_SOURCE)
 	ocamldep $^ > $@

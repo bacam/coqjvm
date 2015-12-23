@@ -28,6 +28,8 @@ Require FSetInterface.
 Require FMapCombine.
 Require OrderedType.
 
+Require BuiltinClasses.
+
 Module ResourceChecker
         (RC_B    : BASICS)
         (BASESEM : ILL_BASE_SEMANTICS  RC_B)
@@ -806,7 +808,6 @@ Save.
 
 (** *** The initial classpool and its correctness. *)
 
-Require BuiltinClasses.
 Module BIC := BuiltinClasses.BuiltinClasses RC_B RC_ANN.GA.A RC_C RC_CP.
 
 Definition initial_spectable : OverrideChecker.ClassTable.t (OverrideChecker.SpecTable.t RC_ANN.method_specification) :=

@@ -113,39 +113,39 @@ Inductive typed_val (classes:RDT_CP.cert_classpool) (heap:cert_heap classes)
 
 Parameter type_check_rt_val : forall classes heap v ty, {typed_val classes heap v ty}+{~typed_val classes heap v ty}.
 
-Hypothesis object_field_value_unique : forall classes heap addr fld_cls fld_nm fld_ty v v',
+Axiom object_field_value_unique : forall classes heap addr fld_cls fld_nm fld_ty v v',
   object_field_value classes heap addr fld_cls fld_nm fld_ty v ->
   object_field_value classes heap addr fld_cls fld_nm fld_ty v' ->
   v = v'.
 
-Hypothesis object_class_unique : forall classes heap addr cls_nm cls_nm',
+Axiom object_class_unique : forall classes heap addr cls_nm cls_nm',
   object_class classes heap addr cls_nm ->
   object_class classes heap addr cls_nm' ->
   cls_nm = cls_nm'.
 Implicit Arguments object_class_unique [classes heap addr cls_nm cls_nm'].
 
-Hypothesis field_value_implies_exists : forall classes heap addr fld_cls fld_nm fld_ty v,
+Axiom field_value_implies_exists : forall classes heap addr fld_cls fld_nm fld_ty v,
   object_field_value classes heap addr fld_cls fld_nm fld_ty v ->
   object_exists classes heap addr.
 
-Hypothesis object_class_implies_class_exists : forall classes heap addr cls_nm,
+Axiom object_class_implies_class_exists : forall classes heap addr cls_nm,
   object_class classes heap addr cls_nm ->
   exists c, RDT_CP.class_loaded classes cls_nm c /\ RDT_C.class_interface c = false.
 Implicit Arguments object_class_implies_class_exists [classes heap addr cls_nm].
 
-Hypothesis object_class_implies_exists : forall classes heap addr cls_nm,
+Axiom object_class_implies_exists : forall classes heap addr cls_nm,
   object_class classes heap addr cls_nm ->
   object_exists classes heap addr.
 
-Hypothesis preserve_object_field_value : forall classesA classesB heap addr fld_cls fld_nm fld_ty v poc,
+Axiom preserve_object_field_value : forall classesA classesB heap addr fld_cls fld_nm fld_ty v poc,
   object_field_value classesA heap addr fld_cls fld_nm fld_ty v ->
   object_field_value classesB (preserve_cert_heap heap poc) addr fld_cls fld_nm fld_ty v.
 
-Hypothesis preserve_object_class : forall classesA classesB heap addr cls_nm poc,
+Axiom preserve_object_class : forall classesA classesB heap addr cls_nm poc,
   object_class classesA heap addr cls_nm ->
   object_class classesB (preserve_cert_heap heap poc) addr cls_nm.
 
-Hypothesis preserve_object_exists : forall classesA classesB heap addr poc,
+Axiom preserve_object_exists : forall classesA classesB heap addr poc,
   object_exists classesA heap addr ->
   object_exists classesB (preserve_cert_heap heap poc) addr.
 
@@ -195,7 +195,7 @@ Parameter preserve_cert_fieldstore_over_classes : forall
    cert_fieldstore classesB (preserve_cert_heap heap poc).
 Implicit Arguments preserve_cert_fieldstore_over_classes [classesA classesB heap].
 
-Hypothesis preserve_fieldstore_value_over_classes :
+Axiom preserve_fieldstore_value_over_classes :
   forall classesA classesB heap fields fld_cls fld_nm fld_ty v
     (poc:RDT_CP.preserve_old_classes classesA classesB),
     fieldstore_value classesA heap fields fld_cls fld_nm fld_ty v ->
@@ -210,7 +210,7 @@ Parameter preserve_cert_fieldstore_over_heap : forall
    cert_fieldstore classes heapB.
 Implicit Arguments preserve_cert_fieldstore_over_heap [classes heapA heapB].
 
-Hypothesis preserve_fieldstore_value_over_heap :
+Axiom preserve_fieldstore_value_over_heap :
   forall classes heapA heapB fields fld_cls fld_nm fld_ty v
     (hpc:heap_preserve_classes classes heapA heapB),
     fieldstore_value classes heapA fields fld_cls fld_nm fld_ty v ->

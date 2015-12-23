@@ -85,7 +85,7 @@ Inductive super_class_chain (classes:cert_classpool) : option CP_B.Classname.t -
      super_class_chain classes (CP_C.class_super_class c')) ->
    super_class_chain classes (Some nm).
 
-Hypothesis super_class_chain_induction
+Axiom super_class_chain_induction
      : forall (classes : cert_classpool)
          (P : forall o : option CP_B.Classname.t,
               super_class_chain classes o -> Prop),
@@ -102,13 +102,13 @@ Hypothesis super_class_chain_induction
        forall (o : option CP_B.Classname.t) (s : super_class_chain classes o),
        P o s.
 
-Hypothesis scc_None : forall classes (ssc:super_class_chain classes None), ssc = class_chain_end classes.
+Axiom scc_None : forall classes (ssc:super_class_chain classes None), ssc = class_chain_end classes.
 
-Hypothesis scc_Some : forall classes nm (ssc:super_class_chain classes (Some nm)),
+Axiom scc_Some : forall classes nm (ssc:super_class_chain classes (Some nm)),
   exists c, exists c_exists, exists c_class, exists s,
     ssc = class_chain_step classes nm c c_exists c_class s.
 
-Hypothesis scc_gives_class : forall classes o_nm nm c,
+Axiom scc_gives_class : forall classes o_nm nm c,
   o_nm = Some nm ->
   super_class_chain classes o_nm ->
   class_loaded classes nm c ->
@@ -128,7 +128,7 @@ match
   H1 in (super_class_chain _ o)
   return (o = Some nm -> super_class_chain classes (CP_C.class_super_class c))
 with
-| class_chain_end =>
+| class_chain_end _ =>
     fun H2 : None = Some nm =>
     let H3 :=
       eq_ind None
@@ -138,7 +138,7 @@ with
          | None => True
          end) I (Some nm) H2 in
     False_ind (super_class_chain classes (CP_C.class_super_class c)) H3
-| class_chain_step nm0 c0 _ _ H2 =>
+| class_chain_step _ nm0 c0 _ _ H2 =>
     fun H3 : Some nm0 = Some nm =>
     let H4 :=
       f_equal
@@ -153,13 +153,13 @@ with
 end H0.
 Implicit Arguments super_class_chain_inv [classes nm c o_nm].
 
-Hypothesis super_class_chain_not_not_there : forall classes nm o_nm,
+Axiom super_class_chain_not_not_there : forall classes nm o_nm,
   o_nm = Some nm ->
   super_class_chain classes o_nm ->
   ~(~(exists c, class_loaded classes nm c)).
 Implicit Arguments super_class_chain_not_not_there [classes nm o_nm].
 
-Hypothesis cert_classpool_gives_scc : forall classes nm c,
+Axiom cert_classpool_gives_scc : forall classes nm c,
   class_loaded classes nm c ->
   CP_C.class_interface c = false ->
   super_class_chain classes (CP_C.class_super_class c).
@@ -178,7 +178,7 @@ Inductive good_interface_list2 : cert_classpool -> list CP_B.Classname.t -> Prop
    good_interface_list2 classes rest ->
    good_interface_list2 classes (i_nm::rest).
 
-Hypothesis good_interface_list2_induction :
+Axiom good_interface_list2_induction :
   forall
     P : forall (c : cert_classpool) (l : list CP_B.Classname.t),
       good_interface_list2 c l -> Prop,
@@ -301,29 +301,29 @@ with
 end H0.
 Implicit Arguments good_interface_list2_inv_2 [classes l i_nm rest].
 
-Hypothesis good_interface_list2_not_not_there : forall classes l i_nm rest,
+Axiom good_interface_list2_not_not_there : forall classes l i_nm rest,
   good_interface_list2 classes l ->
   l = i_nm::rest ->
   ~(~(exists c, class_loaded classes i_nm c)).
 Implicit Arguments good_interface_list2_not_not_there [classes l i_nm rest].
 
-Hypothesis gil2_gives_interface : forall classes l i_nm rest i,
+Axiom gil2_gives_interface : forall classes l i_nm rest i,
   good_interface_list2 classes l ->
   l = i_nm::rest ->
   class_loaded classes i_nm i ->
   CP_C.class_interface i = true.
 Implicit Arguments gil2_gives_interface [classes l i_nm rest i].
 
-Hypothesis gil2_inv_nil : forall classes (gil:good_interface_list2 classes nil),
+Axiom gil2_inv_nil : forall classes (gil:good_interface_list2 classes nil),
   gil = gil2_nil classes.
 Implicit Arguments gil2_inv_nil [classes].
 
-Hypothesis gil2_inv_cons : forall classes i_nm rest (gil:good_interface_list2 classes (i_nm::rest)),
+Axiom gil2_inv_cons : forall classes i_nm rest (gil:good_interface_list2 classes (i_nm::rest)),
   exists i, exists i_exists, exists i_interface, exists go_up, exists go_along,
    gil = gil2_cons classes i_nm rest i i_exists i_interface go_up go_along.
 Implicit Arguments gil2_inv_cons [classes i_nm rest].
 
-Hypothesis cert_classpool_gives_gil2 : forall classes nm c,
+Axiom cert_classpool_gives_gil2 : forall classes nm c,
   class_loaded classes nm c ->
   good_interface_list2 classes (CP_C.class_interfaces c).
 Implicit Arguments cert_classpool_gives_gil2 [classes nm c].
@@ -357,30 +357,30 @@ Parameter cert_classpool_names : forall classes nm c,
   class_loaded classes (CP_C.class_name c) c.
 Implicit Arguments cert_classpool_names [classes nm c].
 
-Hypothesis cert_classpool_names_2 : forall classes nm c,
+Axiom cert_classpool_names_2 : forall classes nm c,
   class_loaded classes nm c ->
   CP_C.class_name c = nm.
 Implicit Arguments cert_classpool_names_2 [classes nm c].
 
-Hypothesis class_loaded_unique : forall classes nm c1 c2,
+Axiom class_loaded_unique : forall classes nm c1 c2,
   class_loaded classes nm c1 ->
   class_loaded classes nm c2 ->
   c1 = c2.
 Implicit Arguments class_loaded_unique.
 
-Hypothesis no_super_is_jlObject : forall classes nm c,
+Axiom no_super_is_jlObject : forall classes nm c,
   class_loaded classes nm c ->
   CP_C.class_super_class c = None ->
   nm = CP_B.java_lang_Object.
 
-Hypothesis cert_classpool_has_Object : forall classes,
+Axiom cert_classpool_has_Object : forall classes,
   exists c,
    class_loaded classes CP_B.java_lang_Object c /\
    CP_C.class_super_class c = None /\
    CP_C.class_interfaces c = nil /\
    CP_C.class_interface c = false.
 
-Hypothesis cert_classpool_gives_interface_super_class_Object : forall classes nm c,
+Axiom cert_classpool_gives_interface_super_class_Object : forall classes nm c,
   class_loaded classes nm c ->
   CP_C.class_interface c = true ->
   CP_C.class_super_class c = Some CP_B.java_lang_Object.
@@ -411,7 +411,7 @@ Definition premethod_to_method (pre_m : CP_C.premethod) : CP_C.method :=
 
 Parameter preclass_to_class : CP_C.preclass -> option CP_C.class.
 
-Hypothesis preclass_to_class_props : forall pc c,
+Axiom preclass_to_class_props : forall pc c,
  preclass_to_class pc = Some c ->
    CP_C.class_name c = CP_C.preclass_name pc
  /\CP_C.class_constantpool c = CP_C.preclass_constantpool pc
@@ -426,10 +426,10 @@ Definition preserve_old_classes :=
   forall nm c, class_loaded classes nm c ->
                class_loaded classes' nm c.
 
-Hypothesis preserve_old_classes_id : forall classes,
+Axiom preserve_old_classes_id : forall classes,
   preserve_old_classes classes classes.
 
-Hypothesis preserve_old_classes_trans : forall classesA classesB classesC,
+Axiom preserve_old_classes_trans : forall classesA classesB classesC,
   preserve_old_classes classesA classesB ->
   preserve_old_classes classesB classesC ->
   preserve_old_classes classesA classesC.
@@ -439,7 +439,7 @@ Definition only_add_from_preclasses := fun classes classes' preclasses =>
                ((exists pc, preclass_to_class pc = Some c /\ Preclasspool.lookup preclasses nm = Some pc /\ forall c', ~class_loaded classes nm c')
                 \/ class_loaded classes nm c).
 
-Hypothesis compose_only_add : forall classes classes' classes'' preclasses,
+Axiom compose_only_add : forall classes classes' classes'' preclasses,
   preserve_old_classes classes classes' ->
   only_add_from_preclasses classes classes' preclasses ->
   only_add_from_preclasses classes' classes'' preclasses ->
@@ -457,7 +457,7 @@ Notation "{LOAD c , p ~~> c2 & x : A | Q }" := (load_type A (fun (c2:cert_classp
 Implicit Arguments load_ok [A classes preclasses classes'].
 Implicit Arguments load_err [A classes preclasses classes'].
 
-Hypothesis loader_dec : forall (A:Type) (P:cert_classpool -> A -> Prop) preclasses classes (f:{LOAD classes,preclasses ~~> classes' & x : A | P classes' x}),
+Axiom loader_dec : forall (A:Type) (P:cert_classpool -> A -> Prop) preclasses classes (f:{LOAD classes,preclasses ~~> classes' & x : A | P classes' x}),
     (exists classes', exists preserved : preserve_old_classes classes classes', exists only_add, exists a, exists H, f = load_ok _ preserved only_add a H)
  \/ (exists classes', exists preserved : preserve_old_classes classes classes', exists only_add, exists e, f = load_err _ preserved only_add e).
 Implicit Arguments loader_dec [A P preclasses classes].
@@ -469,7 +469,7 @@ Parameter load_and_resolve_aux : forall target preclasses (PI:Preclasspool.wf_re
 Definition preclass_incl := fun preclasses preclasses' =>
   forall nm p, Preclasspool.lookup preclasses nm = Some p -> Preclasspool.lookup preclasses' nm = Some p.
 
-Hypothesis preserve_load_and_resolve_aux :
+Axiom preserve_load_and_resolve_aux :
   forall preclasses P preclasses' target classes classes' classes1 (preserved1:preserve_old_classes classes classes1) only_add1 c c_exists1,
   load_and_resolve_aux target preclasses P classes = load_ok _ preserved1 only_add1 c c_exists1 ->
   preserve_old_classes classes classes' ->

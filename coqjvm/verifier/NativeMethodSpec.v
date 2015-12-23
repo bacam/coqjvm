@@ -99,7 +99,7 @@ Module FileNativeSpec
 
 Module A := VA.GA.A.
 Module F := F0.
-Module Key := PairOrderedType A.ANN_B.Classname A.ANN_B.Methodname.
+Module Key := PairOrderedType B.Classname B.Methodname.
 Module SpecTable := FMapAVL.Make Key.
 
 Definition table :=

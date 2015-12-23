@@ -14,8 +14,8 @@ Inductive error_monad (T:Type) : Type :=
 Definition ret (T:Type) (t:T) := Val T t.
 Definition bind (T T':Type) (t1:error_monad T) (t2:T->error_monad T') :=
   match t1 with
-    | Val v => t2 v
-    | Err e => Err T' e
+    | Val _ v => t2 v
+    | Err _ e => Err T' e
   end.
 Definition fail (T:Type) (s:error) := Err T s.
 
@@ -23,8 +23,8 @@ Definition fail (T:Type) (s:error) := Err T s.
 
 Definition tagfailure (T:Type) (s:error) (t:error_monad T) :=
   match t with
-    | (Val _) as v => v
-    | Err e => Err T (s mlapp e)
+    | (Val _ _) as v => v
+    | Err _ e => Err T (s mlapp e)
   end.
 
 (** ** Translating booleans and options to errors. *)
